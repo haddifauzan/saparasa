@@ -236,7 +236,7 @@ http://localhost/phpmyadmin
 db_saparasa
 ```
 
-3. Import:
+2. Import:
 ```text
 database/db_saparasa.sql
 ```
@@ -249,101 +249,6 @@ Buka browser:
 ```text
 http://localhost/saparasa
 ```
-
----
-
-# GitHub Workflow
-
-Project ini menggunakan GitHub untuk kolaborasi tim.
-
----
-
-# Branch Structure
-
-| Branch | Fungsi |
-|---|---|
-| `main` | Versi final/stable |
-| `develop` | Penggabungan seluruh fitur |
-| `feature/database` | Pengerjaan database |
-| `feature/landing-page` | Landing page |
-| `feature/dashboard-admin` | Dashboard admin |
-| `feature/auth` | Sistem login/register |
-
----
-
-# Workflow Git
-
-## Pull Update Terbaru
-
-```bash
-git pull origin develop
-```
-
----
-
-## Membuat Branch Baru
-
-```bash
-git checkout -b feature/nama-fitur
-```
-
-Contoh:
-```bash
-git checkout -b feature/auth
-```
-
----
-
-## Push Branch
-
-```bash
-git push origin feature/auth
-```
-
----
-
-## Merge ke Develop
-
-Dilakukan setelah fitur selesai dan dicek.
-
----
-
-# Aturan Commit
-
-Gunakan commit message yang jelas.
-
-### Contoh:
-```bash
-git commit -m "add login feature"
-```
-
-```bash
-git commit -m "create CRUD menu"
-```
-
-```bash
-git commit -m "fix review validation"
-```
-
----
-
-# Aturan Kolaborasi
-
-## Wajib
-- Pull sebelum coding
-- Gunakan branch masing-masing
-- Commit dengan pesan yang jelas
-- Diskusi sebelum mengubah struktur database
-
----
-
-## Dilarang
-- Push langsung ke `main`
-- Mengubah database tanpa koordinasi
-- Upload folder XAMPP
-- Rename folder project tanpa diskusi
-
-Karena merge conflict itu kadang lebih bikin stres dibanding revisi dosen 😭
 
 ---
 
