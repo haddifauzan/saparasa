@@ -50,3 +50,18 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+DELIMITER //
+
+-- Prosedur 3: Filter Daftar UMKM Berdasarkan Kategori Rasa atau Kategori UMKM
+CREATE PROCEDURE GetUMKMByKategori(
+    IN p_id_kategori BIGINT
+)
+BEGIN
+    SELECT u.id_umkm, u.nama_umkm, u.pemilik, u.asal_daerah, u.status_halal
+    FROM umkm u
+    WHERE u.id_kategori = p_id_kategori;
+END //
+
+DELIMITER ;
