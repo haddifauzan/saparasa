@@ -1,6 +1,3 @@
--- FILE: database/trigger.sql
--- Diperbarui secara presisi sesuai relasi ERD FINAL SAPARASA
-
 DELIMITER //
 
 -- TRIGGER 1: Otomatis mencatat LOG ketika ada PENGUNJUNG memberikan REVIEW baru
@@ -67,22 +64,16 @@ FOR EACH ROW
 BEGIN
     -- 1. Hapus jadwal operasional
     DELETE FROM operasional_umkm WHERE id_umkm = OLD.id_umkm;
-    
     -- 2. Hapus foto-foto di galeri
     DELETE FROM galeri_umkm WHERE id_umkm = OLD.id_umkm;
-    
     -- 3. Hapus semua review pengunjung terkait
     DELETE FROM review_pengunjung WHERE id_umkm = OLD.id_umkm;
-    
     -- 4. Hapus data sosial media milik UMKM tersebut
     DELETE FROM sosmed_umkm WHERE id_umkm = OLD.id_umkm;
-    
     -- 5. Hapus data di tabel pivot metode pembayaran
     DELETE FROM umkm_pembayaran WHERE id_umkm = OLD.id_umkm;
-    
     -- 6. Hapus data di tabel pivot platform online
     DELETE FROM umkm_platform_online WHERE id_umkm = OLD.id_umkm;
-    
     -- 7. Catat aktivitas penghapusan total ini ke log_aktivitas
     INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
     VALUES (1, CONCAT('Admin menghapus total data UMKM beserta seluruh relasinya pada id_umkm: ', OLD.id_umkm), NOW());
