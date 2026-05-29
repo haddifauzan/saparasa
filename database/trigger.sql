@@ -48,3 +48,21 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- TRIGGER 4: Trigger Validasi Rating (Mencegah Kecurangan/Error)
+-- rating bintang hanya boleh diisi angka 1 sampai 5.
+
+DELIMITER //
+
+CREATE TRIGGER before_review_insert
+BEFORE INSERT ON review_pengunjung
+FOR EACH ROW
+BEGIN
+    -- Jika rating kurang dari 1 atau lebih dari 5, batalkan proses dan munculkan error
+    IF NEW.rating < 1 OR NEW.rating > 5 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: Rating yang dimasukkan harus berada di antara angka 1 sampai 5!';
+    END IF;
+END //
+
+DELIMITER ;
