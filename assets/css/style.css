@@ -1,0 +1,128 @@
+:root {
+    --sapa-green: #1d6a4a;
+    --sapa-green-light: #e8f5ef;
+    --sapa-amber: #d97706;
+    --sapa-amber-light: #fef3c7;
+    --sapa-cream: #fdfbf7;
+    --sapa-dark: #1c1917;
+    --sapa-muted: #6b7280;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--sapa-cream);
+    color: var(--sapa-dark);
+    margin: 0;
+}
+
+/* NAVBAR */
+.navbar-custom {
+    background: rgba(253,251,247,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #E5E0D8;
+    padding: 0.75rem 0;
+    position: sticky; top: 0; z-index: 999;
+}
+
+.name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--sapa-green);
+    letter-spacing: -0.5px;
+}
+
+.sub {
+    font-size: 0.6rem;
+    color: var(--sapa-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -4px;
+}
+
+.nav-link-custom {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--sapa-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.nav-link-custom:hover {
+    background: var(--sapa-green-light);
+    color: var(--sapa-green);
+}
+
+.btn-nav-cta {
+    background: var(--sapa-green);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    border-radius: 100px;
+    border: none;
+}
+
+/* HERO SECTION */
+.hero-section {
+    background: linear-gradient(135deg, #0D3D26 0%, #1D6A4A 60%, #2D8A5E 100%);
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 5rem 0 4rem;
+}
+
+.hero-pattern {
+    position: absolute; 
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+}
+
+.hero-title em {
+    font-style: italic;
+    color: #6EE7B7;
+}
+
+.hero-desc {
+    color: rgba(255,255,255,0.75);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 2rem;
+}
+
+.btn-hero-primary {
+    background: #fff; 
+    color: var(--sapa-green);
+    font-weight: 700; 
+    font-size: 0.9rem;
+    padding: 0.85rem 2rem; 
+    border-radius: 100px;
+    border: none; 
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+}
+
+.btn-hero-primary:hover {
+    transform: translateY(-2px); 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2); 
+    color: var(--sapa-green);
+}
