@@ -66,3 +66,28 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- TRIGGER 5: Trigger Otomatis Membersihkan Data Relasi saat UMKM Dihapus
+-- Jika tidak ada ON DELETE CASCADE di struktur tabel
+
+DELIMITER //
+
+CREATE TRIGGER before_umkm_delete
+BEFORE DELETE ON umkm
+FOR EACH ROW
+BEGIN
+    -- 1. Hapus semua jadwal operasional UMKM tersebut terlebih dahulu
+    DELETE FROM operasional_umkm WHERE id_umkm = OLD.id_umkm;
+    
+    -- 2. Hapus semua foto galeri milik UMKM tersebut
+    DELETE FROM galeri_umkm WHERE id_umkm = OLD.id_umkm;
+    
+    -- 3. Hapus semua review pengunjung terkait UMKM tersebut
+    DELETE FROM review_pengunjung WHERE id_umkm = OLD.id_umkm;
+    
+    -- 4. Catat aktivitas penghapusan ini ke log_aktivitas
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (1, CONCAT('Admin menghapus total data UMKM beserta relasinya pada id_umkm: ', OLD.id_umkm), NOW());
+END //
+
+DELIMITER ;
