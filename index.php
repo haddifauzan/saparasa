@@ -24,7 +24,6 @@
                 </a>
                 <div class="d-none d-md-flex align-items-center gap-1">
                     <a href="#umkm" class="nav-link-custom">Daftar UMKM</a>
-                    <a href="#detail" class="nav-link-custom">Detail</a>
                     <a href="#tentang" class="nav-link-custom">Tentang</a>
                 </div>
                 <div class="d-flex align-items-center gap-2">
@@ -35,6 +34,7 @@
         </div>
     </nav>
 
+    <!-- HERO SECTION -->
     <section class="hero-section">
         <div class="hero-pattern"></div>
         <div class="container">
@@ -53,6 +53,136 @@
             </div>
         </div>
     </section>
+
+    <!-- DETAIL UMKM -->
+    <section class="umkm-section" id="umkm">
+        <div class="container">
+            <div class="row align-items-end mb-5">
+                <div class="col-md-7">
+                    <p class="section-label">Daftar UMKM</p>
+                    <div class="divider-green"></div>
+                    <h2 class="section-title">UMKM Pilihan<br>di Saparua Bandung</h2>
+                </div>
+                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                    <a href="#" style="font-size: 0.88rem; font-weight:600; color:var(--sapa-green); text-decoration:none;">Lihat Semua UMKM →</a>
+                </div>
+            </div>
+
+            <!-- UMKM CARDS -->
+            <div class="row g-4">
+                <!-- UMKM 1 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
+                        <div class="umkm-card-img">
+                            <img src="assets/img/DimsumSmoothies.jpg" alt="">
+                        </div>
+                        <div class="umkm-card-body">
+                            <h3 class="umkm-name">Dimsum Smoothies</h3>
+                            <p class="umkm-clock">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                15.30 - 23.00 WIB
+                            </p>
+                            <div class="umkm-detail">
+                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- UMKM 2 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
+                        <div class="umkm-card-img">
+                            <img src="assets/img/BatagorRonsep.jpg" alt="">
+                        </div>
+                        <div class="umkm-card-body">
+                            <h3 class="umkm-name">Batagor Ronsep</h3>
+                            <p class="umkm-clock">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                08.30 - 18.00 WIB
+                            </p>
+                            <div class="umkm-detail">
+                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- UMKM 3 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
+                        <div class="umkm-card-img">
+                            <img src="assets/img/CimolBojotAA.jpg" alt="">
+                        </div>
+                        <div class="umkm-card-body">
+                            <h3 class="umkm-name">Cimol Bojot AA</h3>
+                            <p class="umkm-clock">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                14.00 - 23.00 WIB
+                            </p>
+                            <div class="umkm-detail">
+                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- UMKM 4 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
+                        <div class="umkm-card-img">
+                            <img src="assets/img/SegarSehat.jpg" alt="">
+                        </div>
+                        <div class="umkm-card-body">
+                            <h3 class="umkm-name">Segar Sehat</h3>
+                            <p class="umkm-clock">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                11.00 - 23.00 WIB
+                            </p>
+                            <div class="umkm-detail">
+                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- UMKM 5 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
+                        <div class="umkm-card-img">
+                            <img src="assets/img/BorneoCoffee.jpg" alt="">
+                        </div>
+                        <div class="umkm-card-body">
+                            <h3 class="umkm-name">Borneo Coffee</h3>
+                            <p class="umkm-clock">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                11.00 - 23.00 WIB
+                            </p>
+                            <div class="umkm-detail">
+                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- UMKM 6 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
+                        <div class="umkm-card-img">
+                            <img src="assets/img/BadmanCoffee.jpg" alt="">
+                        </div>
+                        <div class="umkm-card-body">
+                            <h3 class="umkm-name">Badman Coffee</h3>
+                            <p class="umkm-clock">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                16.00 - 00.00 WIB
+                            </p>
+                            <div class="umkm-detail">
+                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
     <!-- JavaScript -->
     <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
