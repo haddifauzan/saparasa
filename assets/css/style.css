@@ -250,3 +250,56 @@ body {
     background: #C6E8D8; 
     color: var(--sapa-green);
 }
+
+/* FOOTER */
+.footer { 
+    background: var(--sapa-dark); 
+    color: rgba(255,255,255,0.7); 
+    padding: 3.5rem 0 2rem; 
+}
+
+.footer-brand { 
+    font-family: 'Playfair Display', serif; 
+    font-size: 1.5rem; 
+    color: #fff; 
+    font-weight: 700;
+}
+
+.footer-desc { 
+    font-size: 0.83rem; 
+    line-height: 1.7; 
+    margin: 0.75rem 0 0; 
+    max-width: 280px; 
+}
+
+.footer-heading { 
+    font-size: 0.75rem; 
+    font-weight: 700; 
+    letter-spacing: 2px; 
+    text-transform: uppercase; 
+    color: #fff; 
+    margin-bottom: 1rem; 
+}
+
+.footer-link { 
+    display: block; 
+    font-size: 0.83rem; 
+    color: rgba(255,255,255,0.6); 
+    text-decoration: none; 
+    margin-bottom: 0.5rem; 
+    transition: color 0.2s; 
+}
+
+.footer-link:hover { 
+    color: #6EE7B7; 
+}
+
+.footer-divider { 
+    border-color: rgba(255,255,255,0.1); 
+    margin: 2rem 0 1rem; 
+}
+
+.footer-copy { 
+    font-size: 0.78rem; 
+    color: rgba(255,255,255,0.4); 
+}

@@ -183,6 +183,34 @@
         </div>
     </section>
 
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand">SAPARASA</div>
+                    <p class="footer-desc">Platform informasi UMKM kuliner kawasan Saparua Bandung. Temukan, nikmati, dan dukung UMKM Lokal.</p>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="footer-heading">Menu</div>
+                    <a href="#umkm" class="footer-link">Daftar UMKM</a>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <div class="footer-heading">Akun</div>
+                    <a href="#" class="footer-link">Masuk</a>
+                    <a href="#" class="footer-link">Daftar</a>
+                </div>
+                <div class="col-lg-4">
+                    <div class="footer-heading">Tentang</div>
+                    <p style="font-size:0.82rem; line-height:1.7; color:rgba(255,255,255,0.5);">SAPARASA merupakan website sistem informasi UMKM berbasis PHP Native dan MySQL yang digunakan untuk menampilkan informasi UMKM di kawasan Saparua Bandung.</p>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <p class="footer-copy text-center mb-0">© 2026 SAPARASA · Sistem Informasi UMKM Saparua Bandung</p>
+        </div>
+    </footer>
+
     <!-- JavaScript -->
     <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
