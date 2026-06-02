@@ -79,4 +79,15 @@ BEGIN
     VALUES (1, CONCAT('Admin menghapus total data UMKM beserta seluruh relasinya pada id_umkm: ', OLD.id_umkm), NOW());
 END //
 
+-- TRIGGER 6: Validasi Batas Rating Saat User Mengubah (UPDATE) Review
+CREATE TRIGGER before_review_update
+BEFORE UPDATE ON review_pengunjung
+FOR EACH ROW
+BEGIN
+    IF NEW.rating < 1 OR NEW.rating > 5 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error: Rating hasil update harus berada di antara angka 1 sampai 5!';
+    END IF;
+END //
+
 DELIMITER ;
