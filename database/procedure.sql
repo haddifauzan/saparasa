@@ -95,17 +95,18 @@ CREATE PROCEDURE SearchUMKM(
     IN p_keyword VARCHAR(255)
 )
 BEGIN
-    SELECT DISTINCT 
+    SELECT 
         u.id_umkm, 
         u.nama_umkm, 
-        u.pemilik, 
-        u.asal_daerah, 
-        u.deskripsi
+        u.asal_daerah,
+        IFNULL(m.nama_menu, '-') AS nama_menu, -- Menampilkan nama menu yang cocok/terkait
+        IFNULL(m.harga, 0) AS harga            -- Menampilkan harga sekalian agar informatif
     FROM umkm u
     LEFT JOIN menu_umkm m ON u.id_umkm = m.id_umkm
     WHERE u.nama_umkm LIKE CONCAT('%', p_keyword, '%')
        OR u.deskripsi LIKE CONCAT('%', p_keyword, '%')
-       OR m.nama_menu LIKE CONCAT('%', p_keyword, '%'); -- Pencarian menembus ke nama menu
+       OR m.nama_menu LIKE CONCAT('%', p_keyword, '%')
+    ORDER BY u.id_umkm ASC, m.harga DESC;
 END //
 
 DELIMITER ;
