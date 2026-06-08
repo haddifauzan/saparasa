@@ -23,19 +23,20 @@
                     <span class="sub">Kuliner Saparua Bandung</span>
                 </a>
                 <div class="d-none d-md-flex align-items-center gap-1">
+                    <a href="#home" class="nav-link-custom">Beranda</a>
                     <a href="#umkm" class="nav-link-custom">Daftar UMKM</a>
                     <a href="#tentang" class="nav-link-custom">Tentang</a>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <a href="auth/login.php" class="nav-link-custom d-none d-md-block">Masuk</a>
-                    <a href="#" class="btn-nav-cta">Daftar</a>
+                    <a href="auth/register.php" class="btn-nav-cta">Daftar</a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- HERO SECTION -->
-    <section class="hero-section">
+    <section class="hero-section" id="home">
         <div class="hero-pattern"></div>
         <div class="container">
             <div class="row align-items-center gy-5">
