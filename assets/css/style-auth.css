@@ -1,0 +1,131 @@
+:root {
+    --sapa-green: #1d6a4a;
+    --sapa-green-light: #e8f5ef;
+    --sapa-amber: #d97706;
+    --sapa-amber-light: #fef3c7;
+    --sapa-cream: #fdfbf7;
+    --sapa-dark: #1c1917;
+    --sapa-muted: #6b7280;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--sapa-cream);
+    color: var(--sapa-dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.auth-bg-pattern {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #0D3D26 0%, #1D6A4A 100%);
+    z-index: -1;
+}
+
+.auth-bg-pattern::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+}
+
+.auth-card {
+    background: #fff;
+    border: 1px solid #EAE5DC;
+    border-radius: 24px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    max-width: 450px;
+    width: 100%;
+    padding: 2.5rem;
+}
+
+.brand-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--sapa-green);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.brand-sub {
+    font-size: 0.65rem;
+    color: var(--sapa-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -2px;
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--sapa-dark);
+}
+
+.form-control {
+    border: 1px solid #E5E0D8;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    background-color: #faf9f6;
+}
+
+.form-control:focus {
+    border-color: var(--sapa-green);
+    box-shadow: 0 0 0 4px var(--sapa-green-light);
+    background-color: #fff;
+}
+
+.btn-auth-primary {
+    background: var(--sapa-green);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.7rem 1.5rem;
+    border-radius: 100px;
+    border: none;
+    width: 100%;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-auth-primary:hover {
+    background: #154d35;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.auth-link {
+    color: var(--sapa-green);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.auth-link:hover {
+    color: var(--sapa-amber);
+}
+
+.back-to-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.back-to-home:hover {
+    color: #fff;
+}
