@@ -27,7 +27,7 @@
                     <a href="#tentang" class="nav-link-custom">Tentang</a>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="#" class="nav-link-custom d-none d-md-block">Masuk</a>
+                    <a href="auth/login.php" class="nav-link-custom d-none d-md-block">Masuk</a>
                     <a href="#" class="btn-nav-cta">Daftar</a>
                 </div>
             </div>
