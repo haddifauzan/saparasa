@@ -23,7 +23,7 @@
                 <div class="d-none d-md-flex align-items-center gap-1">
                     <a href="../index.php#home" class="nav-link-custom">Beranda</a>
                     <a href="daftar-umkm.php" class="nav-link-custom active" style="background: var(--sapa-green-light); color: var(--sapa-green);">Daftar UMKM</a>
-                    <a href="index.php#tentang" class="nav-link-custom">Tentang</a>
+                    <a href="tentang.php#tentang" class="nav-link-custom">Tentang</a>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <a href="../auth/login.php" class="nav-link-custom d-none d-md-block">Masuk</a>

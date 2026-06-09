@@ -42,7 +42,7 @@
             <h1 class="about-title">Tentang SAPARASA</h1>
             <div class="divider-green-center"></div>
             <p class="text-muted mx-auto mb-0" style="max-width: 700px; line-height: 1.7; font-size: 0.95rem;">
-                SAPARASA adalah sistem informasi geografis dan direktori kuliner berbasis web native yang dirancang khusus untuk memetakan, mendata, dan mempromosikan produk dari pelaku UMKM di kawasan GOR Saparua Kota Bandung.
+                SAPARASA merupakan website sistem informasi UMKM berbasis PHP Native dan MySQL yang digunakan untuk menampilkan informasi UMKM di kawasan Saparua Bandung.
             </p>
         </div>
     </header>
