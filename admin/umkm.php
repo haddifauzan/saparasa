@@ -1,10 +1,75 @@
 <?php
+require_once 'auth/middleware.php';
+checkAdmin();
+require_once '../config/conn.php';
+
 $page_title = 'Data UMKM';
 $topbar_title = 'Data UMKM';
 include 'includes/head.php';
+include 'includes/sidebar.php';
+include 'includes/topbar.php';
+
+// Fetch UMKM list
+$umkm_list = [];
+try {
+    $result = $conn->query("SELECT u.*, k.nama_kategori FROM umkm u JOIN kategori_umkm k ON u.id_kategori = k.id_kategori ORDER BY u.id_umkm ASC");
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $umkm_list[] = $row;
+        }
+    }
+} catch (Exception $e) {
+    // Database fallback
+}
+
+// Fallback to mock data if empty
+if (empty($umkm_list)) {
+    $umkm_list = [
+        [
+            'id_umkm' => 1,
+            'nama_umkm' => 'Minang Jaya',
+            'nama_kategori' => 'Makanan Khas',
+            'pemilik' => 'Budi Santoso',
+            'asal_daerah' => 'Padang, Sumatra Barat',
+            'status_halal' => 'sudah',
+            'izin_usaha' => 'sudah',
+            'status' => 'active'
+        ],
+        [
+            'id_umkm' => 2,
+            'nama_umkm' => 'Kopi Nusantara',
+            'nama_kategori' => 'Minuman',
+            'pemilik' => 'Siti Aminah',
+            'asal_daerah' => 'Takengon, Aceh',
+            'status_halal' => 'sudah',
+            'izin_usaha' => 'sudah',
+            'status' => 'active'
+        ],
+        [
+            'id_umkm' => 3,
+            'nama_umkm' => 'Batik Cirebon',
+            'nama_kategori' => 'Kerajinan',
+            'pemilik' => 'Ahmad Fauzi',
+            'asal_daerah' => 'Cirebon, Jawa Barat',
+            'status_halal' => 'tidak',
+            'izin_usaha' => 'proses',
+            'status' => 'active'
+        ],
+        [
+            'id_umkm' => 4,
+            'nama_umkm' => 'Keripik Mama',
+            'nama_kategori' => 'Oleh-oleh',
+            'pemilik' => 'Dewi Lestari',
+            'asal_daerah' => 'Malang, Jawa Timur',
+            'status_halal' => 'proses',
+            'izin_usaha' => 'belum',
+            'status' => 'pending'
+        ]
+    ];
+}
+
+$statusLabel = ['active' => 'Aktif', 'pending' => 'Review', 'inactive' => 'Nonaktif'];
 ?>
-<?php include 'includes/sidebar.php'; ?>
-<?php include 'includes/topbar.php'; ?>
 
 <div id="main-content">
   <div class="page-content">
@@ -16,50 +81,56 @@ include 'includes/head.php';
       <button class="btn-primary-custom"><i class="fas fa-plus me-1"></i> Tambah UMKM</button>
     </div>
 
-    <!-- UMKM Cards Grid -->
-    <div class="row g-3 mb-4">
-      <?php
-      $umkm_list = [
-        ['Minang Jaya','Padang, Sumatra Barat','Makanan Khas','24 Produk','<i class="fas fa-star text-warning"></i> 4.9','active','<i class="fas fa-utensils text-primary"></i>','Budi Santoso'],
-        ['Kopi Nusantara','Takengon, Aceh','Minuman','18 Produk','<i class="fas fa-star text-warning"></i> 4.8','active','<i class="fas fa-coffee text-primary"></i>','Siti Aminah'],
-        ['Batik Cirebon','Cirebon, Jawa Barat','Kerajinan','15 Produk','<i class="fas fa-star text-warning"></i> 4.7','active','<i class="fas fa-palette text-primary"></i>','Ahmad Fauzi'],
-        ['Keripik Mama','Malang, Jawa Timur','Oleh-oleh','12 Produk','<i class="fas fa-star text-warning"></i> 4.5','pending','<i class="fas fa-seedling text-primary"></i>','Dewi Lestari'],
-        ['Oleh-oleh Bali','Denpasar, Bali','Oleh-oleh','10 Produk','<i class="fas fa-star text-warning"></i> 4.3','inactive','<i class="fas fa-umbrella-beach text-primary"></i>','Rudi Hartono'],
-        ['Dapur Nusantara','Yogyakarta, DIY','Makanan Khas','8 Produk','<i class="fas fa-star text-warning"></i> 4.6','active','<i class="fas fa-concierge-bell text-primary"></i>','Maya Sari'],
-      ];
-      $statusLabel = ['active'=>'Aktif','pending'=>'Review','inactive'=>'Nonaktif'];
-      foreach($umkm_list as $u): ?>
-      <div class="col-md-6 col-xl-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-start gap-3 mb-3">
-              <div style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#e8ecf4,#d0d8f0);
-                          display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">
-                <?= $u[6] ?>
-              </div>
-              <div class="flex-1">
-                <h6 class="fw-700 mb-1" style="font-size:15px"><?= $u[0] ?></h6>
-                <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> <?= $u[1] ?></small>
-              </div>
-              <span class="status-badge <?= $u[5] ?>"><?= $statusLabel[$u[5]] ?></span>
-            </div>
-            <div class="d-flex gap-3 mb-3" style="font-size:13px">
-              <div><span class="text-muted">Kategori:</span> <strong><?= $u[2] ?></strong></div>
-              <div><span class="text-muted">Produk:</span> <strong><?= $u[3] ?></strong></div>
-              <div><strong><?= $u[4] ?></strong></div>
-            </div>
-            <div class="d-flex align-items-center justify-content-between">
-              <small class="text-muted"><i class="fas fa-user me-1"></i> <?= $u[7] ?></small>
-              <div class="d-flex gap-1">
-                <button class="btn-icon view"><i class="fas fa-eye"></i></button>
-                <button class="btn-icon edit"><i class="fas fa-edit"></i></button>
-                <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
-              </div>
-            </div>
-          </div>
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title">Daftar Mitra UMKM</h6>
+      </div>
+      <div class="card-body px-4 py-3">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover datatable m-0">
+            <thead>
+              <tr>
+                <th style="width: 80px;">ID</th>
+                <th>Nama UMKM</th>
+                <th>Kategori</th>
+                <th>Pemilik</th>
+                <th>Asal Daerah</th>
+                <th>Halal</th>
+                <th>Izin Usaha</th>
+                <th style="width: 150px; text-align: center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php foreach ($umkm_list as $u): ?>
+              <tr>
+                <td><?= $u['id_umkm'] ?></td>
+                <td><strong><?= $u['nama_umkm'] ?></strong></td>
+                <td><span class="badge bg-light text-dark border"><?= $u['nama_kategori'] ?></span></td>
+                <td><?= $u['pemilik'] ?></td>
+                <td class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> <?= $u['asal_daerah'] ?></td>
+                <td>
+                  <span class="badge <?= $u['status_halal'] === 'sudah' ? 'bg-success' : ($u['status_halal'] === 'proses' ? 'bg-warning text-dark' : 'bg-secondary') ?>">
+                    <?= ucfirst($u['status_halal']) ?>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge <?= $u['izin_usaha'] === 'sudah' ? 'bg-success' : ($u['izin_usaha'] === 'proses' ? 'bg-warning text-dark' : 'bg-secondary') ?>">
+                    <?= ucfirst($u['izin_usaha']) ?>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-1">
+                    <button class="btn-icon view"><i class="fas fa-eye"></i></button>
+                    <button class="btn-icon edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
         </div>
       </div>
-      <?php endforeach; ?>
     </div>
   </div>
 </div>

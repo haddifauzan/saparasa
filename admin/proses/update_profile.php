@@ -14,9 +14,9 @@ require_once '../../config/conn.php';
 
 // Memastikan request bertipe POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_user       = $_SESSION['id_user'];
-    $nama          = trim($_POST['nama']);
-    $email         = trim($_POST['email']);
+    $id_user = $_SESSION['id_user'];
+    $nama = trim($_POST['nama']);
+    $email = trim($_POST['email']);
     $password_baru = $_POST['password_baru'];
 
     // Validasi input wajib
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $password_hash = $user['password'];
-    $foto_profile  = $user['foto_profile'];
+    $foto_profile = $user['foto_profile'];
 
     // 1. Proses update password jika password baru diisi
     if (!empty($password_baru)) {
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Format yang diperbolehkan
         $allowed_ext = ['jpg', 'jpeg', 'png'];
         // Maksimal ukuran 2MB
-        $max_size    = 2 * 1024 * 1024;
+        $max_size = 2 * 1024 * 1024;
 
         if (!in_array($file_ext, $allowed_ext)) {
             $_SESSION['error'] = "Format file tidak valid! Harap unggah foto dengan format JPG, JPEG, atau PNG.";
@@ -82,14 +82,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Tentukan folder penyimpanan upload
         $upload_dir = '../../public/uploads/foto_profile/';
         
-        // Buat folder jika belum ada (safety precaution)
+        // Buat folder jika belum ada
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
 
         // Generate nama file baru yang unik
         $new_file_name = time() . '_' . uniqid() . '.' . $file_ext;
-        $dest_path     = $upload_dir . $new_file_name;
+        $dest_path = $upload_dir . $new_file_name;
 
         // Pindahkan file ke folder uploads
         if (move_uploaded_file($file_tmp, $dest_path)) {
@@ -118,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt_update->execute()) {
             // Update data session agar langsung tersinkronisasi di tampilan
-            $_SESSION['nama']         = $nama;
-            $_SESSION['email']        = $email;
+            $_SESSION['nama'] = $nama;
+            $_SESSION['email'] = $email;
             $_SESSION['foto_profile'] = $foto_profile;
 
             $_SESSION['success'] = "Profil Anda berhasil diperbarui!";

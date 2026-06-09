@@ -1,6 +1,7 @@
 DELIMITER //
 
 -- TRIGGER 1: Otomatis mencatat LOG ketika ada PENGUNJUNG memberikan REVIEW baru
+DROP TRIGGER IF EXISTS after_review_insert //
 CREATE TRIGGER after_review_insert
 AFTER INSERT ON review_pengunjung
 FOR EACH ROW
@@ -15,6 +16,7 @@ END //
 
 
 -- TRIGGER 2: Otomatis mencatat LOG ketika ADMIN MENGHAPUS MENU makanan/minuman
+DROP TRIGGER IF EXISTS after_menu_delete //
 CREATE TRIGGER after_menu_delete
 AFTER DELETE ON menu_umkm
 FOR EACH ROW
@@ -30,6 +32,7 @@ END //
 
 
 -- TRIGGER 3: Otomatis mencatat LOG ketika ada USER/PENGGUNA BARU yang mendaftar akun
+DROP TRIGGER IF EXISTS after_user_register //
 CREATE TRIGGER after_user_register
 AFTER INSERT ON users
 FOR EACH ROW
@@ -44,6 +47,7 @@ END //
 
 
 -- TRIGGER 4: Trigger Validasi Rating (Mencegah Kecurangan/Error input dari web)
+DROP TRIGGER IF EXISTS before_review_insert //
 CREATE TRIGGER before_review_insert
 BEFORE INSERT ON review_pengunjung
 FOR EACH ROW
@@ -58,6 +62,7 @@ END //
 
 -- TRIGGER 5: Trigger Otomatis Membersihkan Seluruh Data Relasi saat UMKM Dihapus
 -- Mencegah error 'Foreign Key Constraint Fails' di MySQL karena data pivot menggantung
+DROP TRIGGER IF EXISTS before_umkm_delete //
 CREATE TRIGGER before_umkm_delete
 BEFORE DELETE ON umkm
 FOR EACH ROW
@@ -79,7 +84,9 @@ BEGIN
     VALUES (1, CONCAT('Admin menghapus total data UMKM beserta seluruh relasinya pada id_umkm: ', OLD.id_umkm), NOW());
 END //
 
+
 -- TRIGGER 6: Validasi Batas Rating Saat User Mengubah (UPDATE) Review
+DROP TRIGGER IF EXISTS before_review_update //
 CREATE TRIGGER before_review_update
 BEFORE UPDATE ON review_pengunjung
 FOR EACH ROW
@@ -88,6 +95,155 @@ BEGIN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = 'Error: Rating hasil update harus berada di antara angka 1 sampai 5!';
     END IF;
+END //
+
+
+-- =======================================================
+-- AUDIT LOG TRIGGERS UNTUK DATA MASTER
+-- =======================================================
+
+-- A. TRIGGERS UNTUK KATEGORI UMKM
+DROP TRIGGER IF EXISTS after_kategori_umkm_insert //
+CREATE TRIGGER after_kategori_umkm_insert
+AFTER INSERT ON kategori_umkm
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menambahkan kategori UMKM baru: ', NEW.nama_kategori), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_kategori_umkm_update //
+CREATE TRIGGER after_kategori_umkm_update
+AFTER UPDATE ON kategori_umkm
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin mengubah kategori UMKM: ', OLD.nama_kategori, ' menjadi ', NEW.nama_kategori), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_kategori_umkm_delete //
+CREATE TRIGGER after_kategori_umkm_delete
+AFTER DELETE ON kategori_umkm
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus kategori UMKM: ', OLD.nama_kategori), NOW());
+END //
+
+
+-- B. TRIGGERS UNTUK KATEGORI RASA
+DROP TRIGGER IF EXISTS after_kategori_rasa_insert //
+CREATE TRIGGER after_kategori_rasa_insert
+AFTER INSERT ON kategori_rasa
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menambahkan kategori rasa baru: ', NEW.nama_rasa), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_kategori_rasa_update //
+CREATE TRIGGER after_kategori_rasa_update
+AFTER UPDATE ON kategori_rasa
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin mengubah kategori rasa: ', OLD.nama_rasa, ' menjadi ', NEW.nama_rasa), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_kategori_rasa_delete //
+CREATE TRIGGER after_kategori_rasa_delete
+AFTER DELETE ON kategori_rasa
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus kategori rasa: ', OLD.nama_rasa), NOW());
+END //
+
+
+-- C. TRIGGERS UNTUK BAHAN BAKU
+DROP TRIGGER IF EXISTS after_bahan_baku_insert //
+CREATE TRIGGER after_bahan_baku_insert
+AFTER INSERT ON bahan_baku
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menambahkan bahan baku baru: ', NEW.nama_bahan), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_bahan_baku_update //
+CREATE TRIGGER after_bahan_baku_update
+AFTER UPDATE ON bahan_baku
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin mengubah bahan baku: ', OLD.nama_bahan, ' menjadi ', NEW.nama_bahan), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_bahan_baku_delete //
+CREATE TRIGGER after_bahan_baku_delete
+AFTER DELETE ON bahan_baku
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus bahan baku: ', OLD.nama_bahan), NOW());
+END //
+
+
+-- D. TRIGGERS UNTUK METODE PEMBAYARAN
+DROP TRIGGER IF EXISTS after_metode_pembayaran_insert //
+CREATE TRIGGER after_metode_pembayaran_insert
+AFTER INSERT ON metode_pembayaran
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menambahkan metode pembayaran baru: ', NEW.nama_pembayaran), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_metode_pembayaran_update //
+CREATE TRIGGER after_metode_pembayaran_update
+AFTER UPDATE ON metode_pembayaran
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin mengubah metode pembayaran: ', OLD.nama_pembayaran, ' menjadi ', NEW.nama_pembayaran), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_metode_pembayaran_delete //
+CREATE TRIGGER after_metode_pembayaran_delete
+AFTER DELETE ON metode_pembayaran
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus metode pembayaran: ', OLD.nama_pembayaran), NOW());
+END //
+
+
+-- E. TRIGGERS UNTUK PLATFORM ONLINE
+DROP TRIGGER IF EXISTS after_platform_online_insert //
+CREATE TRIGGER after_platform_online_insert
+AFTER INSERT ON platform_online
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menambahkan platform online baru: ', NEW.nama_platform), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_platform_online_update //
+CREATE TRIGGER after_platform_online_update
+AFTER UPDATE ON platform_online
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin mengubah platform online: ', OLD.nama_platform, ' menjadi ', NEW.nama_platform), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_platform_online_delete //
+CREATE TRIGGER after_platform_online_delete
+AFTER DELETE ON platform_online
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus platform online: ', OLD.nama_platform), NOW());
 END //
 
 DELIMITER ;

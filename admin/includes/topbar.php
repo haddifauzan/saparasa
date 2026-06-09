@@ -14,7 +14,7 @@ $topbar_title = $topbar_title ?? $page_title;
       <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item"><a href="dashboard.php">Admin</a></li>
         <?php if ($topbar_title !== 'Dashboard'): ?>
-        <li class="breadcrumb-item active"><?= htmlspecialchars($topbar_title) ?></li>
+        <li class="breadcrumb-item active"><?= $topbar_title ?></li>
         <?php endif; ?>
       </ol>
     </nav>
@@ -29,9 +29,9 @@ $topbar_title = $topbar_title ?? $page_title;
           $foto_profile = $_SESSION['foto_profile'] ?? 'default_user.png';
           $foto_path = "../public/uploads/foto_profile/" . $foto_profile;
           ?>
-          <img src="<?= htmlspecialchars($foto_path) ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+          <img src="<?= $foto_path ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <span class="uname d-none d-sm-inline"><?= htmlspecialchars($_SESSION['nama'] ?? 'Admin') ?></span>
+        <span class="uname d-none d-sm-inline"><?= $_SESSION['nama'] ?? 'Admin' ?></span>
         <small><i class="fas fa-chevron-down ms-1"></i></small>
       </div>
       <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
@@ -59,7 +59,7 @@ $topbar_title = $topbar_title ?? $page_title;
             $current_foto = $_SESSION['foto_profile'] ?? 'default_user.png';
             $current_foto_path = "../public/uploads/foto_profile/" . $current_foto;
             ?>
-            <img src="<?= htmlspecialchars($current_foto_path) ?>" 
+            <img src="<?= $current_foto_path ?>" 
                  alt="Profil" 
                  class="rounded-circle img-thumbnail shadow-sm" 
                  style="width: 100px; height: 100px; object-fit: cover;">
@@ -67,12 +67,12 @@ $topbar_title = $topbar_title ?? $page_title;
           
           <div class="mb-3">
             <label class="form-label">Nama Lengkap</label>
-            <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($_SESSION['nama'] ?? '') ?>" required>
+            <input type="text" name="nama" class="form-control" value="<?= $_SESSION['nama'] ?? '' ?>" required>
           </div>
           
           <div class="mb-3">
             <label class="form-label">Alamat Email</label>
-            <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($_SESSION['email'] ?? '') ?>" required>
+            <input type="email" name="email" class="form-control" value="<?= $_SESSION['email'] ?? '' ?>" required>
           </div>
           
           <div class="mb-3">
@@ -88,7 +88,7 @@ $topbar_title = $topbar_title ?? $page_title;
           
           <div class="modal-footer px-0 pb-0 border-0 pt-3">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
-            <button type="submit" class="btn btn-primary" style="border-radius: 8px; background: linear-gradient(135deg, var(--primary), #7b2ff7); border: none;">Simpan Perubahan</button>
+            <button type="submit" class="btn btn-primary" style="border-radius: 8px; background: var(--primary); border: none;">Simpan Perubahan</button>
           </div>
         </form>
       </div>

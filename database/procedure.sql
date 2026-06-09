@@ -3,6 +3,7 @@
 DELIMITER //
 
 -- PROSEDUR 1: Mempermudah Admin Menambahkan UMKM Baru
+DROP PROCEDURE IF EXISTS AddNewUMKM //
 CREATE PROCEDURE AddNewUMKM(
     IN p_id_kategori BIGINT,
     IN p_nama_umkm VARCHAR(255),
@@ -31,6 +32,7 @@ BEGIN
 END //
 
 -- PROSEDUR 2: Menampilkan Ringkasan Informasi UMKM & Rating untuk Landing Page
+DROP PROCEDURE IF EXISTS GetUMKMSummary //
 CREATE PROCEDURE GetUMKMSummary(
     IN p_id_umkm BIGINT
 )
@@ -50,6 +52,7 @@ BEGIN
 END //
 
 -- PROSEDUR 3: Filter Daftar UMKM Berdasarkan Kategori (Makanan/Minuman)
+DROP PROCEDURE IF EXISTS GetUMKMByKategori //
 CREATE PROCEDURE GetUMKMByKategori(
     IN p_id_kategori BIGINT
 )
@@ -61,6 +64,7 @@ END //
 
 
 -- PROSEDUR 4: Menampilkan Daftar Menu Berdasarkan ID UMKM
+DROP PROCEDURE IF EXISTS GetMenuUMKM //
 CREATE PROCEDURE GetMenuUMKM(
     IN p_id_umkm BIGINT
 )
@@ -73,6 +77,7 @@ END //
 
 
 -- PROSEDUR 5: Menampilkan Daftar Komentar & Rating Pengunjung
+DROP PROCEDURE IF EXISTS GetReviewUMKM //
 CREATE PROCEDURE GetReviewUMKM(
     IN p_id_umkm BIGINT
 )
@@ -91,6 +96,7 @@ END //
 
 
 -- PROSEDUR 6: Fitur Kotak Pencarian UMKM
+DROP PROCEDURE IF EXISTS SearchUMKM //
 CREATE PROCEDURE SearchUMKM(
     IN p_keyword VARCHAR(255)
 )
@@ -107,6 +113,110 @@ BEGIN
        OR u.deskripsi LIKE CONCAT('%', p_keyword, '%')
        OR m.nama_menu LIKE CONCAT('%', p_keyword, '%')
     ORDER BY u.id_umkm ASC, m.harga DESC;
+END //
+
+
+-- ==========================================
+-- PROSEDUR CRUD UNTUK DATA MASTER
+-- ==========================================
+
+-- A. PROSEDUR KATEGORI UMKM
+DROP PROCEDURE IF EXISTS sp_AddKategoriUMKM //
+CREATE PROCEDURE sp_AddKategoriUMKM(IN p_nama VARCHAR(255))
+BEGIN
+    INSERT INTO kategori_umkm (nama_kategori) VALUES (p_nama);
+END //
+
+DROP PROCEDURE IF EXISTS sp_EditKategoriUMKM //
+CREATE PROCEDURE sp_EditKategoriUMKM(IN p_id BIGINT, IN p_nama VARCHAR(255))
+BEGIN
+    UPDATE kategori_umkm SET nama_kategori = p_nama WHERE id_kategori = p_id;
+END //
+
+DROP PROCEDURE IF EXISTS sp_DeleteKategoriUMKM //
+CREATE PROCEDURE sp_DeleteKategoriUMKM(IN p_id BIGINT)
+BEGIN
+    DELETE FROM kategori_umkm WHERE id_kategori = p_id;
+END //
+
+
+-- B. PROSEDUR KATEGORI RASA
+DROP PROCEDURE IF EXISTS sp_AddKategoriRasa //
+CREATE PROCEDURE sp_AddKategoriRasa(IN p_nama VARCHAR(255))
+BEGIN
+    INSERT INTO kategori_rasa (nama_rasa) VALUES (p_nama);
+END //
+
+DROP PROCEDURE IF EXISTS sp_EditKategoriRasa //
+CREATE PROCEDURE sp_EditKategoriRasa(IN p_id BIGINT, IN p_nama VARCHAR(255))
+BEGIN
+    UPDATE kategori_rasa SET nama_rasa = p_nama WHERE id_rasa = p_id;
+END //
+
+DROP PROCEDURE IF EXISTS sp_DeleteKategoriRasa //
+CREATE PROCEDURE sp_DeleteKategoriRasa(IN p_id BIGINT)
+BEGIN
+    DELETE FROM kategori_rasa WHERE id_rasa = p_id;
+END //
+
+
+-- C. PROSEDUR BAHAN BAKU
+DROP PROCEDURE IF EXISTS sp_AddBahanBaku //
+CREATE PROCEDURE sp_AddBahanBaku(IN p_nama VARCHAR(255))
+BEGIN
+    INSERT INTO bahan_baku (nama_bahan) VALUES (p_nama);
+END //
+
+DROP PROCEDURE IF EXISTS sp_EditBahanBaku //
+CREATE PROCEDURE sp_EditBahanBaku(IN p_id BIGINT, IN p_nama VARCHAR(255))
+BEGIN
+    UPDATE bahan_baku SET nama_bahan = p_nama WHERE id_bahan = p_id;
+END //
+
+DROP PROCEDURE IF EXISTS sp_DeleteBahanBaku //
+CREATE PROCEDURE sp_DeleteBahanBaku(IN p_id BIGINT)
+BEGIN
+    DELETE FROM bahan_baku WHERE id_bahan = p_id;
+END //
+
+
+-- D. PROSEDUR METODE PEMBAYARAN
+DROP PROCEDURE IF EXISTS sp_AddMetodePembayaran //
+CREATE PROCEDURE sp_AddMetodePembayaran(IN p_nama VARCHAR(255))
+BEGIN
+    INSERT INTO metode_pembayaran (nama_pembayaran) VALUES (p_nama);
+END //
+
+DROP PROCEDURE IF EXISTS sp_EditMetodePembayaran //
+CREATE PROCEDURE sp_EditMetodePembayaran(IN p_id BIGINT, IN p_nama VARCHAR(255))
+BEGIN
+    UPDATE metode_pembayaran SET nama_pembayaran = p_nama WHERE id_pembayaran = p_id;
+END //
+
+DROP PROCEDURE IF EXISTS sp_DeleteMetodePembayaran //
+CREATE PROCEDURE sp_DeleteMetodePembayaran(IN p_id BIGINT)
+BEGIN
+    DELETE FROM metode_pembayaran WHERE id_pembayaran = p_id;
+END //
+
+
+-- E. PROSEDUR PLATFORM ONLINE
+DROP PROCEDURE IF EXISTS sp_AddPlatformOnline //
+CREATE PROCEDURE sp_AddPlatformOnline(IN p_nama VARCHAR(255))
+BEGIN
+    INSERT INTO platform_online (nama_platform) VALUES (p_nama);
+END //
+
+DROP PROCEDURE IF EXISTS sp_EditPlatformOnline //
+CREATE PROCEDURE sp_EditPlatformOnline(IN p_id BIGINT, IN p_nama VARCHAR(255))
+BEGIN
+    UPDATE platform_online SET nama_platform = p_nama WHERE id_platform = p_id;
+END //
+
+DROP PROCEDURE IF EXISTS sp_DeletePlatformOnline //
+CREATE PROCEDURE sp_DeletePlatformOnline(IN p_id BIGINT)
+BEGIN
+    DELETE FROM platform_online WHERE id_platform = p_id;
 END //
 
 DELIMITER ;
