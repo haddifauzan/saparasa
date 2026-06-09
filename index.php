@@ -114,7 +114,7 @@
                             </div>
 
                             <div class="umkm-detail">
-                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
                             </div>
                         </div>
                     </div>
@@ -137,7 +137,7 @@
                             </div>
 
                             <div class="umkm-detail">
-                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
                             </div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                             </div>
 
                             <div class="umkm-detail">
-                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
                             </div>
                         </div>
                     </div>
@@ -183,7 +183,7 @@
                             </div>
 
                             <div class="umkm-detail">
-                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
                             </div>
                         </div>
                     </div>
@@ -206,7 +206,7 @@
                             </div>
 
                             <div class="umkm-detail">
-                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
                             </div>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
                             </div>
 
                             <div class="umkm-detail">
-                                <a href="#detail" class="btn-detail">Lihat Detail</a>
+                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
                             </div>
                         </div>
                     </div>
@@ -253,8 +253,8 @@
                 </div>
                 <div class="col-6 col-lg-2">
                     <div class="footer-heading">Akun</div>
-                    <a href="#" class="footer-link">Masuk</a>
-                    <a href="#" class="footer-link">Daftar</a>
+                    <a href="auth/login.php" class="footer-link">Masuk</a>
+                    <a href="auth/register.php" class="footer-link">Daftar</a>
                 </div>
                 <div class="col-lg-4">
                     <div class="footer-heading">Tentang</div>
