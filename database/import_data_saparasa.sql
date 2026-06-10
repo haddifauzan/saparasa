@@ -1358,7 +1358,7 @@ INSERT INTO menu_bahan_baku (id_menu, id_bahan) VALUES
 -- ------------------------------------------------------------------------------
 
 -- Password default untuk semua user di bawah adalah: password123
-INSERT INTO users (nama, email, password, role) VALUES
+INSERT INTO users (nama, email, password, role, foto_profile) VALUES
 ('Budi Santoso', 'budi@gmail.com', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 'default_user.png'),
 ('Siti Aminah', 'siti@gmail.com', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 'default_user.png'),
 ('Andi Wijaya', 'andi@gmail.com', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 'default_user.png'),
