@@ -213,6 +213,53 @@ body {
     color: #fff;
 }
 
+/* COLLAGE LAYOUT */
+.collage-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 2px;
+}
+
+.collage-layout img {
+    transition: transform 0.5s;
+}
+
+.collage-2 img {
+    width: 50%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.collage-3 {
+    display: flex;
+}
+
+.collage-main {
+    width: 60%;
+    height: 100%;
+}
+
+.collage-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.collage-side {
+    width: 40%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.collage-side img {
+    width: 100%;
+    height: calc(50% - 1px);
+    object-fit: cover;
+}
+
 /* FOOTER */
 .footer {
     background: var(--sapa-dark);

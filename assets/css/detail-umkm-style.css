@@ -1,0 +1,237 @@
+:root {
+    --sapa-green: #1d6a4a;
+    --sapa-green-light: #e8f5ef;
+    --sapa-amber: #d97706;
+    --sapa-amber-light: #fef3c7;
+    --sapa-cream: #fdfbf7;
+    --sapa-dark: #1c1917;
+    --sapa-muted: #6b7280;
+    --sapa-border: #EAE5DC;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--sapa-cream);
+    color: var(--sapa-dark);
+    margin: 0;
+}
+
+/* NAVBAR */
+.navbar-custom {
+    background: rgba(253,251,247,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #E5E0D8;
+    padding: 0.75rem 0;
+    position: sticky; top: 0; z-index: 999;
+}
+
+.name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--sapa-green);
+    letter-spacing: -0.5px;
+    font-weight: 700;
+}
+
+.sub {
+    font-size: 0.6rem;
+    color: var(--sapa-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -4px;
+}
+
+.nav-link-custom {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--sapa-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.nav-link-custom:hover {
+    background: var(--sapa-green-light);
+    color: var(--sapa-green);
+}
+
+.btn-nav-cta {
+    background: var(--sapa-green);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    border-radius: 100px;
+    border: none;
+    text-decoration: none;
+}
+
+/* DETAIL UMKM PAGE SPECIFIC STYLES */
+.detail-hero {
+    background: #fff;
+    border-bottom: 1px solid var(--sapa-border);
+    padding: 3.5rem 0;
+}
+
+.umkm-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--sapa-dark);
+    margin-bottom: 0.5rem;
+}
+
+.badge-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+.badge-halal {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-kategori {
+    background-color: var(--sapa-green-light);
+    color: var(--sapa-green);
+}
+
+.info-card {
+    background: #fff;
+    border: 1px solid var(--sapa-border);
+    border-radius: 20px;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+}
+
+.info-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    border-bottom: 2px solid var(--sapa-green-light);
+    padding-bottom: 0.5rem;
+}
+
+.menu-box {
+    background: #fff;
+    border: 1px solid var(--sapa-border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    height: 100%;
+}
+
+.menu-box:hover {
+    border-color: rgba(29, 106, 74, 0.3);
+    box-shadow: 0 8px 20px rgba(29, 106, 74, 0.04);
+}
+
+.menu-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.menu-price {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--sapa-amber);
+}
+
+.badge-taste {
+    font-size: 0.7rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.25rem;
+}
+
+.review-item {
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.reviewer-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+}
+
+.review-stars {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+/* FOOTER */
+.footer {
+    background: var(--sapa-dark);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 3.5rem 0 2rem;
+}
+
+.footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.footer-desc {
+    font-size: 0.83rem;
+    line-height: 1.7;
+    margin: 0.75rem 0 0;
+    max-width: 280px;
+}
+
+.footer-heading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.footer-link {
+    display: block;
+    font-size: 0.83rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    margin-bottom: 0.5rem;
+    transition: color 0.2s;
+}
+
+.footer-link:hover {
+    color: #6EE7B7;
+}
+
+.footer-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 2rem 0 1rem;
+}
+
+.footer-copy {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.footer-detail-override {
+    margin-top: 5rem;
+}

@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +13,7 @@
     <link rel="stylesheet" href="../assets/css/tentang-style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
 
     <style>
@@ -16,25 +22,11 @@
 </head>
 <body>
 
-    <nav class="navbar-custom">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <a href="index.php" class="text-decoration-none">
-                    <span class="name">SAPARASA</span>
-                    <span class="sub">Kuliner Saparua Bandung</span>
-                </a>
-                <div class="d-none d-md-flex align-items-center gap-1">
-                    <a href="../index.php#home" class="nav-link-custom">Beranda</a>
-                    <a href="daftar-umkm.php" class="nav-link-custom">Daftar UMKM</a>
-                    <a href="tentang.php" class="nav-link-custom active" style="background: var(--sapa-green-light); color: var(--sapa-green);">Tentang</a>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="../auth/login.php" class="nav-link-custom d-none d-md-block">Masuk</a>
-                    <a href="../auth/register.php" class="btn-nav-cta">Daftar</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php 
+    $base_path = '../';
+    $active_page = 'tentang';
+    include '../includes/navbar.php'; 
+    ?>
 
     <header class="about-header">
         <div class="container">
@@ -98,7 +90,7 @@
             <div class="row g-4 justify-content-center">
                 <div class="col-xl-3 col-md-6">
                     <div class="team-card">
-                        <h4 class="member-name">Afit Fajar</h4>
+                        <h4 class="member-name">Afit Fajar R.</h4>
                         <p class="member-role">NIM. 2501826</p>
                     </div>
                 </div>
@@ -119,40 +111,14 @@
 
                 <div class="col-xl-3 col-md-6">
                     <div class="team-card">
-                        <h4 class="member-name">Kang Farrel</h4>
-                        <p class="member-role">NIM. 2507xxx</p>
+                        <h4 class="member-name">M. Farrel Athaillah</h4>
+                        <p class="member-role">NIM. 2408487</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-lg-4">
-                    <div class="footer-brand">SAPARASA</div>
-                    <p class="footer-desc">Platform informasi UMKM kuliner kawasan Saparua Bandung. Temukan, nikmati, dan dukung UMKM Lokal.</p>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="footer-heading">Menu</div>
-                    <a href="daftar-umkm.php" class="footer-link">Daftar UMKM</a>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="footer-heading">Akun</div>
-                    <a href="../auth/login.php" class="footer-link">Masuk</a>
-                    <a href="../auth/register.php" class="footer-link">Daftar</a>
-                </div>
-                <div class="col-lg-4">
-                    <div class="footer-heading">Tentang</div>
-                    <p style="font-size:0.82rem; line-height:1.7; color:rgba(255,255,255,0.5);">SAPARASA merupakan website sistem informasi UMKM berbasis PHP Native dan MySQL yang digunakan untuk menampilkan informasi UMKM di kawasan Saparua Bandung.</p>
-                </div>
-            </div>
-            <hr class="footer-divider">
-            <p class="footer-copy text-center mb-0">© 2026 SAPARASA · Sistem Informasi UMKM Saparua Bandung</p>
-        </div>
-    </footer>
-
-    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <?php include '../includes/footer.php'; ?>
 </body>
 </html>

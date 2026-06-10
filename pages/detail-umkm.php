@@ -1,276 +1,125 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once '../config/conn.php';
+
+// Get UMKM ID from query parameter
+$id_umkm = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($id_umkm <= 0) {
+    header("Location: daftar-umkm.php");
+    exit();
+}
+
+// 1. Fetch UMKM profile
+$stmt = $conn->prepare("CALL sp_get_umkm_detail(?)");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$umkm = $stmt->get_result()->fetch_assoc();
+while ($conn->next_result()) { $conn->store_result(); }
+
+if (!$umkm) {
+    header("Location: daftar-umkm.php");
+    exit();
+}
+
+// 2. Fetch menu list for this UMKM
+$stmt = $conn->prepare("CALL sp_get_umkm_menus(?)");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$menus = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+// 3. Fetch reviews
+$stmt = $conn->prepare("CALL sp_get_umkm_reviews(?)");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$reviews = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+// 4. Fetch operational schedule
+$stmt = $conn->prepare("CALL sp_get_umkm_operasional(?)");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$operasionals = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+// 5. Fetch payment methods
+$stmt = $conn->prepare("CALL sp_get_umkm_payments(?)");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$payments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+// 6. Fetch online platforms
+$stmt = $conn->prepare("CALL sp_get_umkm_platforms(?)");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$platforms = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+// 7. Fetch gallery photos
+// 7. Fetch gallery photos – separate stand and menu
+$stmt = $conn->prepare("CALL sp_get_umkm_gallery_by_type(?, 'stand')");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$stand_gallery = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+$stmt = $conn->prepare("CALL sp_get_umkm_gallery_by_type(?, 'menu')");
+$stmt->bind_param("i", $id_umkm);
+$stmt->execute();
+$menu_gallery = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+while ($conn->next_result()) { $conn->store_result(); }
+
+// Days mapping for Indonesian
+$days = [
+    'Sunday' => 'minggu',
+    'Monday' => 'senin',
+    'Tuesday' => 'selasa',
+    'Wednesday' => 'rabu',
+    'Thursday' => 'kamis',
+    'Friday' => 'jumat',
+    'Saturday' => 'sabtu'
+];
+$today = $days[date('l')];
+
+// Decide display category badge
+$disp_kategori = $umkm['nama_kategori'];
+$snack_keywords = ['cemilan', 'cimol', 'basreng', 'churos', 'churros', 'lekker', 'pisang', 'roti', 'potato', 'jasuke', 'taichan'];
+$is_snack = false;
+foreach ($snack_keywords as $kw) {
+    if (stripos($umkm['nama_umkm'], $kw) !== false) {
+        $is_snack = true;
+        break;
+    }
+}
+if ($is_snack) {
+    $disp_kategori = 'Cemilan';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail UMKM - SAPARASA</title>
+    <title><?= $umkm['nama_umkm'] ?> - Detail UMKM SAPARASA</title>
     <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="../assets/css/detail-umkm-style.css?v=<?= time() ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --sapa-green: #1d6a4a;
-            --sapa-green-light: #e8f5ef;
-            --sapa-amber: #d97706;
-            --sapa-amber-light: #fef3c7;
-            --sapa-cream: #fdfbf7;
-            --sapa-dark: #1c1917;
-            --sapa-muted: #6b7280;
-            --sapa-border: #EAE5DC;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            background-color: var(--sapa-cream);
-            color: var(--sapa-dark);
-            margin: 0;
-        }
-
-        /* NAVBAR */
-        .navbar-custom {
-            background: rgba(253,251,247,0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid #E5E0D8;
-            padding: 0.75rem 0;
-            position: sticky; top: 0; z-index: 999;
-        }
-
-        .name {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            color: var(--sapa-green);
-            letter-spacing: -0.5px;
-            font-weight: 700;
-        }
-
-        .sub {
-            font-size: 0.6rem;
-            color: var(--sapa-muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            display: block;
-            margin-top: -4px;
-        }
-
-        .nav-link-custom {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--sapa-dark);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: background 0.2s;
-            text-decoration: none;
-        }
-
-        .nav-link-custom:hover {
-            background: var(--sapa-green-light);
-            color: var(--sapa-green);
-        }
-
-        .btn-nav-cta {
-            background: var(--sapa-green);
-            color: #fff;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 0.5rem 1.25rem;
-            border-radius: 100px;
-            border: none;
-            text-decoration: none;
-        }
-
-        /* DETAIL HERO HEADER */
-        .detail-hero {
-            background: #fff;
-            border-bottom: 1px solid var(--sapa-border);
-            padding: 3.5rem 0;
-        }
-
-        .umkm-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--sapa-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .badge-status {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-halal {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-kategori {
-            background-color: var(--sapa-green-light);
-            color: var(--sapa-green);
-        }
-
-        /* SIDEBAR CARD & CONTENT CARD */
-        .info-card {
-            background: #fff;
-            border: 1px solid var(--sapa-border);
-            border-radius: 20px;
-            padding: 1.75rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.01);
-        }
-
-        .info-card-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-            border-bottom: 2px solid var(--sapa-green-light);
-            padding-bottom: 0.5rem;
-        }
-
-        /* MENU ITEM GRID */
-        .menu-box {
-            background: #fff;
-            border: 1px solid var(--sapa-border);
-            border-radius: 16px;
-            padding: 1.25rem;
-            transition: all 0.2s ease;
-            height: 100%;
-        }
-
-        .menu-box:hover {
-            border-color: rgba(29, 106, 74, 0.3);
-            box-shadow: 0 8px 20px rgba(29, 106, 74, 0.04);
-        }
-
-        .menu-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .menu-price {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--sapa-amber);
-        }
-
-        .badge-taste {
-            font-size: 0.7rem;
-            background: #f3f4f6;
-            color: #4b5563;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            margin-right: 0.25rem;
-        }
-
-        /* REVIEW COMPONENT */
-        .review-item {
-            border-bottom: 1px solid #f3f4f6;
-            padding-bottom: 1.25rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .review-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-            margin-bottom: 0;
-        }
-
-        .reviewer-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 0.15rem;
-        }
-
-        .review-stars {
-            color: #fbbf24;
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
-
-        /* FOOTER */
-        .footer { 
-            background: var(--sapa-dark); 
-            color: rgba(255,255,255,0.7); 
-            padding: 3.5rem 0 2rem; 
-            margin-top: 5rem;
-        }
-
-        .footer-brand { 
-            font-family: 'Playfair Display', serif; 
-            font-size: 1.5rem; 
-            color: #fff; 
-            font-weight: 700;
-        }
-
-        .footer-desc { 
-            font-size: 0.83rem; 
-            line-height: 1.7; 
-            margin: 0.75rem 0 0; 
-            max-width: 280px; 
-        }
-
-        .footer-heading { 
-            font-size: 0.75rem; 
-            font-weight: 700; 
-            letter-spacing: 2px; 
-            text-transform: uppercase; 
-            color: #fff; 
-            margin-bottom: 1rem; 
-        }
-
-        .footer-link { 
-            display: block; 
-            font-size: 0.83rem; 
-            color: rgba(255,255,255,0.6); 
-            text-decoration: none; 
-            margin-bottom: 0.5rem; 
-            transition: color 0.2s; 
-        }
-
-        .footer-link:hover { 
-            color: #6EE7B7; 
-        }
-
-        .footer-divider { 
-            border-color: rgba(255,255,255,0.1); 
-            margin: 2rem 0 1rem; 
-        }
-
-        .footer-copy { 
-            font-size: 0.78rem; 
-            color: rgba(255,255,255,0.4); 
-        }
-    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 
-    <nav class="navbar-custom">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <a href="index.php" class="text-decoration-none">
-                    <span class="name">SAPARASA</span>
-                    <span class="sub">Kuliner Saparua Bandung</span>
-                </a>
-                <div class="d-none d-md-flex align-items-center gap-1">
-                    <a href="../index.php#home" class="nav-link-custom">Beranda</a>
-                    <a href="daftar-umkm.php" class="nav-link-custom active" style="background: var(--sapa-green-light); color: var(--sapa-green);">Daftar UMKM</a>
-                    <a href="tentang.php" class="nav-link-custom">Tentang</a>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="../auth/login.php" class="nav-link-custom d-none d-md-block">Masuk</a>
-                    <a href="../auth/register.php" class="btn-nav-cta">Daftar</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php 
+    $base_path = '../';
+    $active_page = 'daftar';
+    include '../includes/navbar.php'; 
+    ?>
 
     <header class="detail-hero">
         <div class="container">
@@ -283,12 +132,18 @@
 
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
-                    <h1 class="umkm-title">Batagor Ronsep</h1>
-                    <p class="text-muted mb-0">Pemilik: <span class="fw-medium text-dark">Jar</span> · Asal Daerah: <span class="fw-medium text-dark">Bandung</span></p>
+                    <h1 class="umkm-title"><?= $umkm['nama_umkm'] ?></h1>
+                    <p class="text-muted mb-0">Pemilik UMKM: <span class="fw-medium text-dark"><?= $umkm['pemilik'] ?></span> · Asal Daerah UMKM: <span class="fw-medium text-dark"><?= $umkm['asal_daerah'] ?: 'Tidak ada' ?></span></p>
                 </div>
                 <div class="d-flex gap-2">
-                    <span class="badge-status badge-halal">✓ Terverifikasi Halal</span>
-                    <span class="badge-status badge-kategori">Makanan</span>
+                    <?php if ($umkm['status_halal'] === 'sudah'): ?>
+                        <span class="badge-status badge-halal">✓ Terverifikasi Halal</span>
+                    <?php elseif ($umkm['status_halal'] === 'proses'): ?>
+                        <span class="badge-status" style="background-color: #fef3c7; color: #d97706;">⌛ Sertifikasi Halal Diproses</span>
+                    <?php else: ?>
+                        <span class="badge-status" style="background-color: #fee2e2; color: #991b1b;">✗ Belum Sertifikasi Halal</span>
+                    <?php endif; ?>
+                    <span class="badge-status badge-kategori"><?= $disp_kategori ?></span>
                 </div>
             </div>
         </div>
@@ -300,74 +155,103 @@
             <div class="col-lg-8">
                 
                 <section class="info-card">
+                    <h2 class="info-card-title">Tentang Warung</h2>
+                    <p style="font-size: 0.95rem; line-height: 1.7; color: var(--sapa-muted);">
+                        <?= nl2br($umkm['deskripsi']) ?>
+                    </p>
+                </section>
+
+                <?php if (!empty($stand_gallery)): ?>
+                <section class="info-card">
+                    <h2 class="info-card-title">Galeri Stand</h2>
+                    <div class="row g-2">
+                        <?php foreach ($stand_gallery as $g): ?>
+                            <div class="col-4 col-md-3">
+                                <img src="../public/uploads/galeri_umkm/<?= $g['foto'] ?>" class="img-fluid rounded gallery-img" data-bs-toggle="modal" data-bs-target="#galleryModal" data-src="../public/uploads/galeri_umkm/<?= $g['foto'] ?>" style="height: 120px; width: 100%; object-fit: cover; cursor:pointer;">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+                <?php endif; ?>
+
+                <?php if (!empty($menu_gallery)): ?>
+                <section class="info-card">
+                    <h2 class="info-card-title">Galeri Menu</h2>
+                    <div class="row g-2">
+                        <?php foreach ($menu_gallery as $g): ?>
+                            <div class="col-4 col-md-3">
+                                <img src="../public/uploads/galeri_umkm/<?= $g['foto'] ?>" class="img-fluid rounded gallery-img" data-bs-toggle="modal" data-bs-target="#galleryModal" data-src="../public/uploads/galeri_umkm/<?= $g['foto'] ?>" style="height: 120px; width: 100%; object-fit: cover; cursor:pointer;">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+                <?php endif; ?>
+
+                <section class="info-card">
                     <h2 class="info-card-title">Daftar Menu Hidangan</h2>
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="menu-box">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h3 class="menu-title">Cuanki Komplit</h3>
-                                    <span class="badge bg-danger text-white style" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">Best Seller</span>
-                                </div>
-                                <p class="menu-price mb-2">Rp 20.000</p>
-                                <div class="mb-0">
-                                    <span class="badge-taste">Gurih</span>
-                                    <span class="badge-taste">Asin</span>
-                                </div>
+                        <?php if (empty($menus)): ?>
+                            <div class="col-12">
+                                <p class="text-muted mb-0">Menu hidangan belum terdaftar.</p>
                             </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="menu-box">
-                                <h3 class="menu-title">Batagor Kuah</h3>
-                                <p class="menu-price mb-2">Rp 18.000</p>
-                                <div class="mb-0">
-                                    <span class="badge-taste">Gurih</span>
-                                    <span class="badge-taste">Pedas Opsional</span>
+                        <?php else: ?>
+                            <?php foreach ($menus as $m): ?>
+                                <div class="col-md-6">
+                                    <div class="menu-box">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h3 class="menu-title"><?= $m['nama_menu'] ?></h3>
+                                            <?php if ($m['menu_terlaris']): ?>
+                                                <span class="badge bg-danger text-white" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">Best Seller</span>
+                                            <?php elseif ($m['menu_utama']): ?>
+                                                <span class="badge bg-success text-white" style="font-size: 0.65rem; padding: 0.2rem 0.4rem; background-color: var(--sapa-green) !important;">Menu Utama</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <p class="menu-price mb-2">Rp <?= number_format($m['harga'], 0, ',', '.') ?></p>
+                                        <div class="mb-0">
+                                            <?php if (!empty($m['rasa'])): ?>
+                                                <p class="menu-rasa mb-1" style="font-size: 0.85rem;"><strong>Rasa:</strong> <?= htmlspecialchars($m['rasa']) ?></p>
+                                            <?php endif; ?>
+                                            <?php if (!empty($m['bahan'])): ?>
+                                                <p class="menu-bahan mb-0" style="font-size: 0.85rem;"><strong>Bahan:</strong> <?= htmlspecialchars($m['bahan']) ?></p>
+                                            <?php endif; ?>
+                                            <?php if (empty($m['rasa']) && empty($m['bahan'])): ?>
+                                                <p class="text-muted mb-0" style="font-size: 0.85rem;">-</p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="menu-box">
-                                <h3 class="menu-title">Es Teh Manis</h3>
-                                <p class="menu-price mb-2">Rp 5.000</p>
-                                <div class="mb-0">
-                                    <span class="badge-taste">Manis</span>
-                                    <span class="badge-taste">Segar</span>
-                                </div>
-                            </div>
-                        </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </section>
 
                 <section class="info-card">
-                    <h2 class="info-card-title">Ulasan Pengunjung</h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="info-card-title mb-0">Ulasan Pengunjung</h2>
+                        <button id="addReviewBtn" class="btn btn-sm btn-success" style="background-color: var(--sapa-green); border-color: var(--sapa-green);">+ Tambah Ulasan</button>
+                    </div>
                     
-                    <div class="review-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h4 class="reviewer-name">J4RZZZ</h4>
-                                <div class="review-stars">★★★★★ <span class="text-muted" style="font-size: 0.75rem;">(5.0)</span></div>
+                    <?php if (empty($reviews)): ?>
+                        <p class="text-muted mb-0" style="font-size: 0.95rem;">Belum ada ulasan untuk warung ini.</p>
+                    <?php else: ?>
+                        <?php foreach ($reviews as $rev): ?>
+                            <div class="review-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h4 class="reviewer-name"><?= $rev['reviewer_name'] ?: 'Pengunjung Anonim' ?></h4>
+                                        <div class="review-stars">
+                                            <?= str_repeat('★', intval($rev['rating'])) ?><?= str_repeat('☆', 5 - intval($rev['rating'])) ?> 
+                                            <span class="text-muted" style="font-size: 0.75rem;">(<?= number_format($rev['rating'], 1) ?>)</span>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted"><?= date('d F Y', strtotime($rev['created_at'])) ?></small>
+                                </div>
+                                <p class="text-muted mb-0" style="font-size: 0.9rem; line-height: 1.6;">
+                                    "<?= $rev['komentar'] ?>"
+                                </p>
                             </div>
-                            <small class="text-muted">05 Juni 2026</small>
-                        </div>
-                        <p class="text-muted mb-0" style="font-size: 0.9rem; line-height: 1.6;">
-                            "Cuankinya juara banget, kalbunya kerasa gurih alami. Antrean rapi dan pelayanannya cepat walaupun pas jam makan siang rame."
-                        </p>
-                    </div>
-
-                    <div class="review-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h4 class="reviewer-name">Rian F.</h4>
-                                <div class="review-stars">★★★★☆ <span class="text-muted" style="font-size: 0.75rem;">(4.0)</span></div>
-                            </div>
-                            <small class="text-muted">01 Juni 2026</small>
-                        </div>
-                        <p class="text-muted mb-0" style="font-size: 0.9rem; line-height: 1.6;">
-                            "Rasa batagor kuahnya enak, porsi pas kenyang di kantong mahasiswa. Tempat duduk bersih."
-                        </p>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </section>
 
             </div>
@@ -377,18 +261,26 @@
                 <div class="info-card">
                     <h2 class="info-card-title">Waktu Operasional</h2>
                     <div style="font-size: 0.9rem; line-height: 1.8;">
-                        <div class="d-flex justify-content-between border-bottom py-1">
-                            <span class="text-muted">Senin - Jumat</span>
-                            <span class="fw-medium">10:00 - 19:00 WIB</span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom py-1">
-                            <span class="text-muted">Sabtu</span>
-                            <span class="fw-medium">08:00 - 20:00 WIB</span>
-                        </div>
-                        <div class="d-flex justify-content-between py-1">
-                            <span class="text-white bg-danger px-2 rounded fw-semibold" style="font-size: 0.75rem; align-self: center;">Minggu</span>
-                            <span class="text-danger fw-medium">Tutup</span>
-                        </div>
+                        <?php if (empty($operasionals)): ?>
+                            <p class="text-muted mb-0">Informasi jam operasional belum tersedia.</p>
+                        <?php else: ?>
+                            <?php foreach ($operasionals as $op): ?>
+                                <?php
+                                $hari_display = ucfirst($op['hari']);
+                                $buka = $op['jam_buka'] ? date('H.i', strtotime($op['jam_buka'])) : null;
+                                $tutup = $op['jam_tutup'] ? date('H.i', strtotime($op['jam_tutup'])) : null;
+                                $is_today = (strtolower($op['hari']) === $today);
+                                ?>
+                                <div class="d-flex justify-content-between border-bottom py-1 <?= $is_today ? 'fw-bold' : '' ?>" <?= $is_today ? 'style="color: var(--sapa-green);"' : '' ?>>
+                                    <span class="<?= $is_today ? 'text-dark fw-bold' : 'text-muted' ?>">
+                                        <?= $hari_display ?> <?= $is_today ? '(Hari Ini)' : '' ?>
+                                    </span>
+                                    <span class="<?= !$buka ? 'text-danger fw-semibold' : '' ?>">
+                                        <?= $buka ? "$buka - $tutup WIB" : 'Tutup' ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -397,17 +289,29 @@
                     
                     <h6 class="fw-semibold mb-2" style="font-size: 0.85rem; color: var(--sapa-muted); text-transform: uppercase; letter-spacing: 0.5px;">Metode Pembayaran</h6>
                     <div class="d-flex flex-wrap gap-1 mb-4">
-                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;">Tunai (Cash)</span>
-                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;">QRIS (Dana/OVO/GoPay)</span>
-                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;">Transfer Bank</span>
+                        <?php if (empty($payments)): ?>
+                            <span class="text-muted" style="font-size: 0.85rem;">Tunai (Cash)</span>
+                        <?php else: ?>
+                            <?php foreach ($payments as $p): ?>
+                                <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.75rem;"><?= $p['nama_pembayaran'] ?></span>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
 
-                    <h6 class="fw-semibold mb-2" style="font-size: 0.85rem; color: var(--sapa-muted); text-transform: uppercase; letter-spacing: 0.5px;">Koordinat Geospasial</h6>
-                    <div class="p-3 bg-light rounded border" style="font-size: 0.82rem; font-family: monospace;">
-                        <div>Latitude  : -6.910245</div>
-                        <div>Longitude : 107.619082</div>
-                    </div>
-                    <small class="text-muted d-block mt-2" style="font-size: 0.75rem; line-height: 1.4;">*Data koordinat relasional di atas terintegrasi langsung dengan sistem pemetaan peta kuliner kawasan GOR Saparua.</small>
+                    <?php if (!empty($platforms)): ?>
+                        <h6 class="fw-semibold mb-2" style="font-size: 0.85rem; color: var(--sapa-muted); text-transform: uppercase; letter-spacing: 0.5px;">Pesan Online</h6>
+                        <div class="d-flex flex-wrap gap-1 mb-4">
+                            <?php foreach ($platforms as $plat): ?>
+                                <a href="<?= $plat['link_platform'] ?>" target="_blank" class="badge bg-success text-white px-2 py-1 text-decoration-none" style="font-size: 0.75rem; background-color: var(--sapa-green) !important;">
+                                    <?= $plat['nama_platform'] ?> ↗
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <h6 class="fw-semibold mb-2" style="font-size: 0.85rem; color: var(--sapa-muted); text-transform: uppercase; letter-spacing: 0.5px;">Lokasi UMKM (Peta)</h6>
+                    <div id="map" class="rounded border" style="height: 300px; width: 100%; z-index: 1;" data-lat="<?= $umkm['latitude'] ?>" data-lng="<?= $umkm['longitude'] ?>"></div>
+                    <small class="text-muted d-block mt-2" style="font-size: 0.75rem; line-height: 1.4;">*Peta interaktif terintegrasi untuk menemukan lokasi warung dengan mudah di kawasan Saparua.</small>
                 </div>
 
             </div>
@@ -415,32 +319,72 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-lg-4">
-                    <div class="footer-brand">SAPARASA</div>
-                    <p class="footer-desc">Platform informasi UMKM kuliner kawasan Saparua Bandung. Temukan, nikmati, dan dukung UMKM Lokal.</p>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="footer-heading">Menu</div>
-                    <a href="daftar-umkm.php" class="footer-link">Daftar UMKM</a>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="footer-heading">Akun</div>
-                    <a href="../auth/login.php" class="footer-link">Masuk</a>
-                    <a href="../auth/register.php" class="footer-link">Daftar</a>
-                </div>
-                <div class="col-lg-4">
-                    <div class="footer-heading">Tentang</div>
-                    <p style="font-size:0.82rem; line-height:1.7; color:rgba(255,255,255,0.5);">SAPARASA merupakan website sistem informasi UMKM berbasis PHP Native dan MySQL yang digunakan untuk menampilkan informasi UMKM di kawasan Saparua Bandung.</p>
+    <?php include '../includes/footer.php'; ?>
+
+    <!-- Gallery Modal -->
+    <div class="modal fade" id="galleryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 bg-transparent">
+                <div class="modal-body p-0 position-relative text-center">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1055;"></button>
+                    <img src="" id="modalImg" class="img-fluid rounded shadow-lg" alt="Foto UMKM" style="max-height: 85vh; object-fit: contain; background: #000;">
                 </div>
             </div>
-            <hr class="footer-divider">
-            <p class="footer-copy text-center mb-0">© 2026 SAPARASA · Sistem Informasi UMKM Saparua Bandung</p>
         </div>
-    </footer>
+    </div>
 
-    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px; border: none;">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold" style="color: var(--sapa-dark);">Tulis Ulasan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <form id="reviewForm">
+                        <input type="hidden" id="reviewIdUmkm" value="<?= $id_umkm ?>">
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size: 0.9rem; font-weight: 500;">Rating</label>
+                            <select id="reviewRating" class="form-select" required>
+                                <option value="" disabled selected>Pilih Rating...</option>
+                                <option value="5">5 Bintang (Sangat Baik)</option>
+                                <option value="4">4 Bintang (Baik)</option>
+                                <option value="3">3 Bintang (Cukup)</option>
+                                <option value="2">2 Bintang (Kurang)</option>
+                                <option value="1">1 Bintang (Sangat Kurang)</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label" style="font-size: 0.9rem; font-weight: 500;">Komentar</label>
+                            <textarea id="reviewKomentar" class="form-control" rows="4" placeholder="Bagaimana pengalaman Anda makan di sini?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn w-100" style="background-color: var(--sapa-green); color: #fff; border-radius: 8px; font-weight: 500;">Kirim Ulasan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal (if not logged in) -->
+    <div class="modal fade" id="loginPromptModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center" style="border-radius: 12px; border: none; padding: 2rem;">
+                <h4 class="mb-3 fw-bold" style="color: var(--sapa-dark);">Belum Masuk?</h4>
+                <p class="text-muted mb-4">Silakan masuk atau daftar terlebih dahulu untuk dapat menambahkan ulasan pengunjung.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="../auth/login.php" class="btn btn-outline-success" style="border-color: var(--sapa-green); color: var(--sapa-green);">Masuk</a>
+                    <a href="../auth/register.php" class="btn" style="background-color: var(--sapa-green); color: #fff;">Daftar Akun</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        window.isLoggedIn = <?= isset($_SESSION['id_user']) ? 'true' : 'false' ?>;
+    </script>
+    <script src="../assets/js/detail-umkm.js"></script>
 </body>
 </html>

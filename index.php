@@ -1,36 +1,73 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'config/conn.php';
+
+$keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+
+// Days mapping for Indonesian
+$days = [
+    'Sunday' => 'minggu',
+    'Monday' => 'senin',
+    'Tuesday' => 'selasa',
+    'Wednesday' => 'rabu',
+    'Thursday' => 'kamis',
+    'Friday' => 'jumat',
+    'Saturday' => 'sabtu'
+];
+$today = $days[date('l')];
+
+// CALL sp_get_umkm_list(p_search, p_category, p_today, p_limit)
+$stmt = $conn->prepare("CALL sp_get_umkm_list(?, '', ?, ?)");
+$limit = ($keyword !== '') ? 0 : 6;
+$stmt->bind_param("ssi", $keyword, $today, $limit);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$umkm_list = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $foto_path = !empty($row['foto']) ? 'public/uploads/galeri_umkm/' . $row['foto'] : 'assets/img/DimsumSmoothies.jpg';
+        
+        $umkm_list[] = [
+            'id_umkm' => $row['id_umkm'],
+            'nama_umkm' => $row['nama_umkm'],
+            'kategori' => $row['nama_kategori'],
+            'avg_rating' => $row['avg_rating'],
+            'count_reviews' => $row['count_reviews'],
+            'foto_path' => $foto_path,
+            'op_text' => $row['op_text'] ?: 'Tutup'
+        ];
+    }
+}
+// Free result and clear multi-results from stored procedure CALL
+while ($conn->next_result()) {
+    $conn->store_result();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAPARASA</title>
-    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=1.2">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar-custom">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <a href="#" class="text-decoration-none">
-                    <span class="name">SAPARASA</span>
-                    <span class="sub">Kuliner Saparua Bandung</span>
-                </a>
-                <div class="d-none d-md-flex align-items-center gap-1">
-                    <a href="#home" class="nav-link-custom">Beranda</a>
-                    <a href="#umkm" class="nav-link-custom">Daftar UMKM</a>
-                    <a href="pages/tentang.php" class="nav-link-custom">Tentang</a>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="auth/login.php" class="nav-link-custom d-none d-md-block">Masuk</a>
-                    <a href="auth/register.php" class="btn-nav-cta">Daftar</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <?php 
+    $base_path = '';
+    $active_page = 'beranda';
+    include 'includes/navbar.php'; 
+    ?>
 
     <section class="hero-section" id="home">
         <div class="hero-pattern"></div>
@@ -62,17 +99,17 @@
                     <div class="row g-3 justify-content-center align-items-center">
                         <div class="col-7">
                             <div class="card border-0 rounded-4 shadow-lg overflow-hidden position-relative" style="transform: rotate(-2deg); transition: transform 0.3s;">
-                                <img src="assets/img/DimsumSmoothies.jpg" alt="Dimsum" class="card-img-top" style="height: 240px; object-fit: cover;">
+                                <img src="assets/img/sapa1.png" alt="Dimsum" class="card-img-top" style="height: 240px; object-fit: cover;">
                             </div>
                         </div>
                         
                         <div class="col-5 d-flex flex-column gap-3">
                             <div class="card border-0 rounded-4 shadow-sm overflow-hidden position-relative" style="transform: rotate(3deg); transition: transform 0.3s;">
-                                <img src="assets/img/BatagorRonsep.jpg" alt="Batagor" class="card-img-top" style="height: 130px; object-fit: cover;">
+                                <img src="assets/img/sapa2.png" alt="Batagor" class="card-img-top" style="height: 130px; object-fit: cover;">
                             </div>
 
                             <div class="card border-0 rounded-4 shadow-sm overflow-hidden position-relative" style="transform: rotate(-1deg); transition: transform 0.3s;">
-                                <img src="assets/img/BorneoCoffee.jpg" alt="Coffee" class="card-img-top" style="height: 130px; object-fit: cover;">
+                                <img src="assets/img/sapa3.png" alt="Coffee" class="card-img-top" style="height: 130px; object-fit: cover;">
                             </div>
                         </div>
                     </div>
@@ -94,178 +131,43 @@
                     <a href="pages/daftar-umkm.php" style="font-size: 0.88rem; font-weight:600; color:var(--sapa-green); text-decoration:none;">Lihat Semua UMKM →</a>
                 </div>
             </div>
-
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
-                        <div class="umkm-card-img">
-                            <img src="assets/img/DimsumSmoothies.jpg" alt="">
-                        </div>
-                        <div class="umkm-card-body">
-                            <h3 class="umkm-name">Dimsum Smoothies</h3>
-                            <p class="umkm-clock">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                15.30 - 23.00 WIB
-                            </p>
-                            
-                            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-                                <span style="color: #d97706; font-weight: 700;">★ 4.8</span>
-                                <span class="text-muted">(24 Ulasan)</span>
-                            </div>
-
-                            <div class="umkm-detail">
-                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
-                            </div>
-                        </div>
+                <?php if (empty($umkm_list)): ?>
+                    <div class="col-12 text-center my-5">
+                        <div class="fs-1 text-muted mb-3"><i class="fa-solid fa-utensils"></i></div>
+                        <h4 class="text-muted">Tidak ada UMKM yang cocok dengan pencarian "<strong><?= $keyword ?></strong>"</h4>
+                        <p class="text-muted">Coba cari dengan kata kunci lain seperti "Dimsum", "Kopi", atau "Pedas".</p>
+                        <a href="index.php#umkm" class="btn btn-success mt-2 rounded-pill px-4" style="background-color: #1d6a4a;">Lihat Semua UMKM</a>
                     </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
-                        <div class="umkm-card-img">
-                            <img src="assets/img/BatagorRonsep.jpg" alt="">
-                        </div>
-                        <div class="umkm-card-body">
-                            <h3 class="umkm-name">Batagor Ronsep</h3>
-                            <p class="umkm-clock">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                08.30 - 18.00 WIB
-                            </p>
-
-                            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-                                <span style="color: #d97706; font-weight: 700;">★ 4.7</span>
-                                <span class="text-muted">(18 Ulasan)</span>
-                            </div>
-
-                            <div class="umkm-detail">
-                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
-                        <div class="umkm-card-img">
-                            <img src="assets/img/CimolBojotAA.jpg" alt="">
-                        </div>
-                        <div class="umkm-card-body">
-                            <h3 class="umkm-name">Cimol Bojot AA</h3>
-                            <p class="umkm-clock">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                14.00 - 23.00 WIB
-                            </p>
-
-                            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-                                <span style="color: #d97706; font-weight: 700;">★ 4.5</span>
-                                <span class="text-muted">(32 Ulasan)</span>
-                            </div>
-
-                            <div class="umkm-detail">
-                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
+                <?php else: ?>
+                    <?php foreach ($umkm_list as $umkm): ?>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="umkm-card" onclick="window.location.href='pages/detail-umkm.php?id=<?= $umkm['id_umkm'] ?>'">
+                                <div class="umkm-card-img">
+                                    <span class="badge-category"><?= $umkm['kategori'] ?></span>
+                                    <img src="<?= $umkm['foto_path'] ?>" alt="<?= $umkm['nama_umkm'] ?>" style="height: 100%; object-fit: cover; width: 100%;">
+                                </div>
+                                <div class="umkm-card-body">
+                                    <h3 class="umkm-name"><?= $umkm['nama_umkm'] ?></h3>
+                                    <p class="umkm-clock">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <?= $umkm['op_text'] ?>
+                                    </p>
+                                    <div class="umkm-rating">
+                                        <span style="color: #d97706; font-weight: 700;">★ <?= $umkm['avg_rating'] > 0 ? $umkm['avg_rating'] : '-' ?></span>
+                                        <span class="text-muted">(<?= $umkm['count_reviews'] ?> Ulasan)</span>
+                                    </div>
+                                    <a href="pages/detail-umkm.php?id=<?= $umkm['id_umkm'] ?>" class="btn-detail">Lihat Detail UMKM</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
-                        <div class="umkm-card-img">
-                            <img src="assets/img/SegarSehat.jpg" alt="">
-                        </div>
-                        <div class="umkm-card-body">
-                            <h3 class="umkm-name">Segar Sehat</h3>
-                            <p class="umkm-clock">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                11.00 - 23.00 WIB
-                            </p>
-
-                            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-                                <span style="color: #d97706; font-weight: 700;">★ 4.6</span>
-                                <span class="text-muted">(14 Ulasan)</span>
-                            </div>
-
-                            <div class="umkm-detail">
-                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
-                        <div class="umkm-card-img">
-                            <img src="assets/img/BorneoCoffee.jpg" alt="">
-                        </div>
-                        <div class="umkm-card-body">
-                            <h3 class="umkm-name">Borneo Coffee</h3>
-                            <p class="umkm-clock">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                11.00 - 23.00 WIB
-                            </p>
-
-                            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-                                <span style="color: #d97706; font-weight: 700;">★ 4.9</span>
-                                <span class="text-muted">(41 Ulasan)</span>
-                            </div>
-
-                            <div class="umkm-detail">
-                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="umkm-card" onclick="document.getElementById('detail').scrollIntoView({behavior:'smooth'})">
-                        <div class="umkm-card-img">
-                            <img src="assets/img/BadmanCoffee.jpg" alt="">
-                        </div>
-                        <div class="umkm-card-body">
-                            <h3 class="umkm-name">Badman Coffee</h3>
-                            <p class="umkm-clock">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                16.00 - 00.00 WIB
-                            </p>
-
-                            <div class="d-flex align-items-center gap-2 mb-3" style="font-size: 0.85rem;">
-                                <span style="color: #d97706; font-weight: 700;">★ 4.4</span>
-                                <span class="text-muted">(9 Ulasan)</span>
-                            </div>
-
-                            <div class="umkm-detail">
-                                <a href="pages/detail-umkm.php" class="btn-detail">Lihat Detail</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>        </div>
         </div>
     </section>
 
 
-    <footer class="footer">
-        <div class="container">
-            <div class="row gy-4">
-                <div class="col-lg-4">
-                    <div class="footer-brand">SAPARASA</div>
-                    <p class="footer-desc">Platform informasi UMKM kuliner kawasan Saparua Bandung. Temukan, nikmati, dan dukung UMKM Lokal.</p>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="footer-heading">Menu</div>
-                    <a href="#umkm" class="footer-link">Daftar UMKM</a>
-                </div>
-                <div class="col-6 col-lg-2">
-                    <div class="footer-heading">Akun</div>
-                    <a href="auth/login.php" class="footer-link">Masuk</a>
-                    <a href="auth/register.php" class="footer-link">Daftar</a>
-                </div>
-                <div class="col-lg-4">
-                    <div class="footer-heading">Tentang</div>
-                    <p style="font-size:0.82rem; line-height:1.7; color:rgba(255,255,255,0.5);">SAPARASA merupakan website sistem informasi UMKM berbasis PHP Native dan MySQL yang digunakan untuk menampilkan informasi UMKM di kawasan Saparua Bandung.</p>
-                </div>
-            </div>
-            <hr class="footer-divider">
-            <p class="footer-copy text-center mb-0">© 2026 SAPARASA · Sistem Informasi UMKM Saparua Bandung</p>
-        </div>
-    </footer>
-
-    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

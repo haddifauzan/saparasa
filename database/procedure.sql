@@ -273,4 +273,168 @@ BEGIN
     WHERE u.id_umkm = p_id_umkm;
 END //
 
+-- ==========================================
+-- PROSEDUR UNTUK LANDING PAGE & USER VIEW
+-- ==========================================
+
+-- 1. Get UMKM List (Landing Page and Catalog with filters and search)
+DROP PROCEDURE IF EXISTS sp_get_umkm_list //
+CREATE PROCEDURE sp_get_umkm_list(
+    IN p_search VARCHAR(255),
+    IN p_category VARCHAR(255),
+    IN p_today VARCHAR(15),
+    IN p_limit INT
+)
+BEGIN
+    DECLARE v_limit INT;
+    SET v_limit = IF(p_limit IS NULL OR p_limit <= 0, 1000000, p_limit);
+
+    SELECT DISTINCT 
+        u.id_umkm, 
+        u.nama_umkm, 
+        k.nama_kategori,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review_pengunjung WHERE id_umkm = u.id_umkm), 1), 0.0) AS avg_rating,
+        (SELECT COUNT(*) FROM review_pengunjung WHERE id_umkm = u.id_umkm) AS count_reviews,
+        COALESCE(
+            (SELECT foto FROM galeri_umkm WHERE id_umkm = u.id_umkm AND jenis_foto = 'stand' LIMIT 1),
+            (SELECT foto FROM galeri_umkm WHERE id_umkm = u.id_umkm LIMIT 1)
+        ) AS foto,
+        (SELECT CONCAT(TIME_FORMAT(jam_buka, '%H.%i'), ' - ', TIME_FORMAT(jam_tutup, '%H.%i'), ' WIB')
+         FROM operasional_umkm 
+         WHERE id_umkm = u.id_umkm AND hari = p_today AND jam_buka IS NOT NULL AND jam_tutup IS NOT NULL
+        ) AS op_text
+    FROM umkm u
+    LEFT JOIN kategori_umkm k ON u.id_kategori = k.id_kategori
+    LEFT JOIN menu_umkm m ON u.id_umkm = m.id_umkm
+    LEFT JOIN menu_rasa mr ON m.id_menu = mr.id_menu
+    LEFT JOIN kategori_rasa kr ON mr.id_rasa = kr.id_rasa
+    LEFT JOIN menu_bahan_baku mbb ON m.id_menu = mbb.id_menu
+    LEFT JOIN bahan_baku bb ON mbb.id_bahan = bb.id_bahan
+    WHERE 
+        (p_search IS NULL OR p_search = '' OR 
+         u.nama_umkm LIKE CONCAT('%', p_search, '%') OR
+         m.nama_menu LIKE CONCAT('%', p_search, '%') OR
+         kr.nama_rasa LIKE CONCAT('%', p_search, '%') OR
+         bb.nama_bahan LIKE CONCAT('%', p_search, '%'))
+        AND
+        (p_category IS NULL OR p_category = '' OR k.nama_kategori = p_category)
+    ORDER BY u.id_umkm ASC
+    LIMIT v_limit;
+END //
+
+-- 2. Get UMKM Detail Info
+DROP PROCEDURE IF EXISTS sp_get_umkm_detail //
+CREATE PROCEDURE sp_get_umkm_detail(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT u.*, k.nama_kategori 
+    FROM umkm u
+    LEFT JOIN kategori_umkm k ON u.id_kategori = k.id_kategori
+    WHERE u.id_umkm = p_id_umkm;
+END //
+
+
+-- 3. Get UMKM Menus with aggregated rasa and bahan
+DROP PROCEDURE IF EXISTS sp_get_umkm_menus //
+CREATE PROCEDURE sp_get_umkm_menus(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT m.id_menu,
+           m.nama_menu,
+           GROUP_CONCAT(DISTINCT kr.nama_rasa SEPARATOR ', ') AS rasa,
+           GROUP_CONCAT(DISTINCT bb.nama_bahan SEPARATOR ', ') AS bahan,
+           m.harga,
+           m.menu_utama,
+           m.menu_terlaris
+    FROM menu_umkm m
+    LEFT JOIN menu_rasa mr ON m.id_menu = mr.id_menu
+    LEFT JOIN kategori_rasa kr ON mr.id_rasa = kr.id_rasa
+    LEFT JOIN menu_bahan_baku mbb ON m.id_menu = mbb.id_menu
+    LEFT JOIN bahan_baku bb ON mbb.id_bahan = bb.id_bahan
+    WHERE m.id_umkm = p_id_umkm
+    GROUP BY m.id_menu
+    ORDER BY m.menu_utama DESC, m.menu_terlaris DESC, m.id_menu ASC;
+END //
+
+-- 8. Get UMKM Gallery Photos by type (stand or menu)
+DROP PROCEDURE IF EXISTS sp_get_umkm_gallery_by_type //
+CREATE PROCEDURE sp_get_umkm_gallery_by_type(
+    IN p_id_umkm BIGINT,
+    IN p_jenis_foto VARCHAR(20)
+)
+BEGIN
+    SELECT foto FROM galeri_umkm
+    WHERE id_umkm = p_id_umkm AND jenis_foto = p_jenis_foto;
+END //
+
+-- Keep existing sp_get_umkm_gallery for compatibility (returns all photos)
+DROP PROCEDURE IF EXISTS sp_get_umkm_gallery //
+CREATE PROCEDURE sp_get_umkm_gallery(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT * FROM galeri_umkm
+    WHERE id_umkm = p_id_umkm;
+END //
+
+-- 4. Get UMKM Reviews
+DROP PROCEDURE IF EXISTS sp_get_umkm_reviews //
+CREATE PROCEDURE sp_get_umkm_reviews(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT r.*, u.nama AS reviewer_name 
+    FROM review_pengunjung r
+    LEFT JOIN users u ON r.id_user = u.id_user
+    WHERE r.id_umkm = p_id_umkm
+    ORDER BY r.created_at DESC;
+END //
+
+-- 5. Get UMKM Operational Schedule
+DROP PROCEDURE IF EXISTS sp_get_umkm_operasional //
+CREATE PROCEDURE sp_get_umkm_operasional(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT * FROM operasional_umkm 
+    WHERE id_umkm = p_id_umkm
+    ORDER BY FIELD(hari, 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu');
+END //
+
+-- 6. Get UMKM Payment Methods
+DROP PROCEDURE IF EXISTS sp_get_umkm_payments //
+CREATE PROCEDURE sp_get_umkm_payments(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT mp.nama_pembayaran 
+    FROM umkm_pembayaran up
+    JOIN metode_pembayaran mp ON up.id_pembayaran = mp.id_pembayaran
+    WHERE up.id_umkm = p_id_umkm;
+END //
+
+-- 7. Get UMKM Online Platforms
+DROP PROCEDURE IF EXISTS sp_get_umkm_platforms //
+CREATE PROCEDURE sp_get_umkm_platforms(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT po.nama_platform, uop.link_platform 
+    FROM umkm_platform_online uop
+    JOIN platform_online po ON uop.id_platform = po.id_platform
+    WHERE uop.id_umkm = p_id_umkm;
+END //
+
+-- 8. Get UMKM Gallery Photos
+DROP PROCEDURE IF EXISTS sp_get_umkm_gallery //
+CREATE PROCEDURE sp_get_umkm_gallery(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT * FROM galeri_umkm 
+    WHERE id_umkm = p_id_umkm;
+END //
+
 DELIMITER ;
