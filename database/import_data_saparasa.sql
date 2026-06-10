@@ -1357,8 +1357,9 @@ INSERT INTO menu_bahan_baku (id_menu, id_bahan) VALUES
 -- FASE 9: MEMASUKKAN DATA PENGGUNA & ULASAN
 -- ------------------------------------------------------------------------------
 
--- Password default untuk semua user di bawah adalah: password123
+-- Password default untuk semua user di bawah adalah: password123 (Kecuali Admin: admin123)
 INSERT INTO users (nama, email, password, role, foto_profile) VALUES
+('Admin Gege', 'admin@saparasa.com', '$2y$12$RkE4nVoEpcIruLhIGsLjD.eZLQhql.UfINELYwtQ5L9wjsSDO2.KW', 'admin', 'default_admin.png'),
 ('Budi Santoso', 'budi@gmail.com', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 'default_user.png'),
 ('Siti Aminah', 'siti@gmail.com', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 'default_user.png'),
 ('Andi Wijaya', 'andi@gmail.com', '\\.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user', 'default_user.png'),
