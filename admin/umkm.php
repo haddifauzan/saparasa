@@ -19,56 +19,16 @@ try {
         }
     }
 } catch (Exception $e) {
-    // Database fallback
+    echo "Gagal: " . $e->getMessage();
 }
 
-// Fallback to mock data if empty
-if (empty($umkm_list)) {
-    $umkm_list = [
-        [
-            'id_umkm' => 1,
-            'nama_umkm' => 'Minang Jaya',
-            'nama_kategori' => 'Makanan Khas',
-            'pemilik' => 'Budi Santoso',
-            'asal_daerah' => 'Padang, Sumatra Barat',
-            'status_halal' => 'sudah',
-            'izin_usaha' => 'sudah',
-            'status' => 'active'
-        ],
-        [
-            'id_umkm' => 2,
-            'nama_umkm' => 'Kopi Nusantara',
-            'nama_kategori' => 'Minuman',
-            'pemilik' => 'Siti Aminah',
-            'asal_daerah' => 'Takengon, Aceh',
-            'status_halal' => 'sudah',
-            'izin_usaha' => 'sudah',
-            'status' => 'active'
-        ],
-        [
-            'id_umkm' => 3,
-            'nama_umkm' => 'Batik Cirebon',
-            'nama_kategori' => 'Kerajinan',
-            'pemilik' => 'Ahmad Fauzi',
-            'asal_daerah' => 'Cirebon, Jawa Barat',
-            'status_halal' => 'tidak',
-            'izin_usaha' => 'proses',
-            'status' => 'active'
-        ],
-        [
-            'id_umkm' => 4,
-            'nama_umkm' => 'Keripik Mama',
-            'nama_kategori' => 'Oleh-oleh',
-            'pemilik' => 'Dewi Lestari',
-            'asal_daerah' => 'Malang, Jawa Timur',
-            'status_halal' => 'proses',
-            'izin_usaha' => 'belum',
-            'status' => 'pending'
-        ]
-    ];
-}
 
 $statusLabel = ['active' => 'Aktif', 'pending' => 'Review', 'inactive' => 'Nonaktif'];
+$categoryBadges = [
+    'makanan' => 'bg-success text-white',
+    'minuman' => 'bg-primary text-white',
+    'makanan & minuman' => 'bg-warning text-white'
+];
 ?>
 
 <div id="main-content">
@@ -78,8 +38,22 @@ $statusLabel = ['active' => 'Aktif', 'pending' => 'Review', 'inactive' => 'Nonak
         <h1 class="page-title"><i class="fas fa-store me-2"></i> Manajemen UMKM</h1>
         <p class="page-subtitle">Kelola data usaha mikro, kecil, dan menengah yang terdaftar</p>
       </div>
-      <button class="btn-primary-custom"><i class="fas fa-plus me-1"></i> Tambah UMKM</button>
+      <a href="tambah-umkm.php" class="btn btn-success"><i class="fas fa-plus me-1"></i> Tambah UMKM</a>
     </div>
+
+    <?php if (isset($_SESSION['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= $_SESSION['success'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success']); endif; ?>
+    
+    <?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= $_SESSION['error'] ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']); endif; ?>
 
     <div class="card">
       <div class="card-header">
@@ -105,7 +79,13 @@ $statusLabel = ['active' => 'Aktif', 'pending' => 'Review', 'inactive' => 'Nonak
               <tr>
                 <td><?= $u['id_umkm'] ?></td>
                 <td><strong><?= $u['nama_umkm'] ?></strong></td>
-                <td><span class="badge bg-light text-dark border"><?= $u['nama_kategori'] ?></span></td>
+                <td>
+                  <?php 
+                    $cat_lower = strtolower($u['nama_kategori']);
+                    $badge_class = $categoryBadges[$cat_lower] ?? 'bg-secondary text-white';
+                  ?>
+                  <span class="badge <?= $badge_class ?> border"><?= $u['nama_kategori'] ?></span>
+                </td>
                 <td><?= $u['pemilik'] ?></td>
                 <td class="text-muted"><i class="fas fa-map-marker-alt me-1"></i> <?= $u['asal_daerah'] ?></td>
                 <td>
@@ -120,9 +100,9 @@ $statusLabel = ['active' => 'Aktif', 'pending' => 'Review', 'inactive' => 'Nonak
                 </td>
                 <td class="text-center">
                   <div class="d-flex justify-content-center gap-1">
-                    <button class="btn-icon view"><i class="fas fa-eye"></i></button>
-                    <button class="btn-icon edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                    <a href="detail-umkm.php?id=<?= $u['id_umkm'] ?>" class="btn-icon view text-decoration-none" title="Detail"><i class="fas fa-eye"></i></a>
+                    <a href="edit-umkm.php?id=<?= $u['id_umkm'] ?>" class="btn-icon edit text-decoration-none" title="Edit"><i class="fas fa-edit"></i></a>
+                    <button type="button" class="btn-icon delete border-0 bg-transparent" title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteUMKMModal" onclick="document.getElementById('delete_id_umkm').value = '<?= $u['id_umkm'] ?>'; document.getElementById('delete_nama_umkm').innerText = '<?= addslashes(htmlspecialchars($u['nama_umkm'], ENT_QUOTES)) ?>';"><i class="fas fa-trash"></i></button>
                   </div>
                 </td>
               </tr>
@@ -131,6 +111,29 @@ $statusLabel = ['active' => 'Aktif', 'pending' => 'Review', 'inactive' => 'Nonak
           </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Hapus UMKM -->
+<div class="modal fade" id="deleteUMKMModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="proses_umkm/hapus-umkm.php" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Konfirmasi Hapus</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Apakah Anda yakin ingin menghapus UMKM <strong id="delete_nama_umkm"></strong> beserta seluruh relasinya (menu, ulasan, foto, dll)?</p>
+          <p class="text-danger mb-0"><small><i class="fas fa-info-circle me-1"></i> Tindakan ini tidak dapat dibatalkan!</small></p>
+          <input type="hidden" name="id_umkm" id="delete_id_umkm" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-danger">Ya, Hapus UMKM</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

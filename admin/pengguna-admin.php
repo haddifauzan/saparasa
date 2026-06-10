@@ -19,30 +19,9 @@ try {
         }
     }
 } catch (Exception $e) {
-    // Database fallback
+    echo "Gagal: " . $e->getMessage();
 }
 
-// Fallback to mock data if empty
-if (empty($admins)) {
-    $admins = [
-        [
-            'id_user' => 1,
-            'nama' => 'Admin Gege',
-            'email' => 'admin@saparasa.com',
-            'role' => 'admin',
-            'foto_profile' => 'default_admin.png',
-            'created_at' => '2024-01-12 10:00:00'
-        ],
-        [
-            'id_user' => 2,
-            'nama' => 'Super Admin Saparasa',
-            'email' => 'superadmin@saparasa.com',
-            'role' => 'admin',
-            'foto_profile' => 'default_user.png',
-            'created_at' => '2024-01-01 09:00:00'
-        ]
-    ];
-}
 ?>
 
 <div id="main-content">
@@ -52,8 +31,24 @@ if (empty($admins)) {
         <h1 class="page-title"><i class="fas fa-user-shield me-2"></i> Manajemen Admin</h1>
         <p class="page-subtitle">Kelola akun administrator platform Saparasa</p>
       </div>
-      <button class="btn-primary-custom"><i class="fas fa-plus me-1"></i> Tambah Admin</button>
+      <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addAdminModal"><i class="fas fa-plus me-1"></i> Tambah Admin</button>
     </div>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= $_SESSION['success'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['success']); ?>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= $_SESSION['error'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
 
     <div class="card">
       <div class="card-header">
@@ -67,7 +62,7 @@ if (empty($admins)) {
                 <th style="width: 80px;">ID</th>
                 <th>Nama</th>
                 <th>Email</th>
-                <th>Peran</th>
+                <th>Role</th>
                 <th>Tanggal Terdaftar</th>
                 <th style="width: 150px; text-align: center;">Aksi</th>
               </tr>
@@ -103,8 +98,14 @@ if (empty($admins)) {
                   <?= date('d M Y', strtotime($adm['created_at'])) ?>
                 </td>
                 <td class="text-center">
-                  <button class="btn-icon edit"><i class="fas fa-edit"></i></button>
-                  <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                  <?php if ($adm['id_user'] != $_SESSION['id_user']): ?>
+                    <form action="proses/hapus/admin.php" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus admin ini?');">
+                        <input type="hidden" name="id_user" value="<?= $adm['id_user'] ?>">
+                        <button type="submit" class="btn-icon delete"><i class="fas fa-trash"></i></button>
+                    </form>
+                  <?php else: ?>
+                    <button class="btn-icon text-muted" disabled title="Anda tidak bisa menghapus akun Anda sendiri"><i class="fas fa-trash"></i></button>
+                  <?php endif; ?>
                 </td>
               </tr>
               <?php endforeach; ?>
@@ -112,6 +113,38 @@ if (empty($admins)) {
           </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Tambah Admin -->
+<div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="proses/tambah/admin.php" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAdminModalLabel">Tambah Admin Baru</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-control" name="nama" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

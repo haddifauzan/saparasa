@@ -19,38 +19,9 @@ try {
         }
     }
 } catch (Exception $e) {
-    // Database fallback
+    echo "Gagal: " . $e->getMessage();
 }
 
-// Fallback to mock data if empty
-if (empty($users)) {
-    $users = [
-        [
-            'id_user' => 3,
-            'nama' => 'User Setia',
-            'email' => 'user@gmail.com',
-            'role' => 'user',
-            'foto_profile' => 'default_user.png',
-            'created_at' => '2024-02-15 11:20:00'
-        ],
-        [
-            'id_user' => 4,
-            'nama' => 'Budi Santoso',
-            'email' => 'budi@email.com',
-            'role' => 'user',
-            'foto_profile' => 'default_user.png',
-            'created_at' => '2024-03-01 14:15:00'
-        ],
-        [
-            'id_user' => 5,
-            'nama' => 'Siti Aminah',
-            'email' => 'siti@email.com',
-            'role' => 'user',
-            'foto_profile' => 'default_user.png',
-            'created_at' => '2024-03-10 16:45:00'
-        ]
-    ];
-}
 ?>
 
 <div id="main-content">
@@ -60,7 +31,6 @@ if (empty($users)) {
         <h1 class="page-title"><i class="fas fa-users me-2"></i> Manajemen User</h1>
         <p class="page-subtitle">Kelola akun pengguna/pengunjung platform Saparasa</p>
       </div>
-      <button class="btn-primary-custom"><i class="fas fa-plus me-1"></i> Tambah User</button>
     </div>
 
     <div class="card">
@@ -75,9 +45,8 @@ if (empty($users)) {
                 <th style="width: 80px;">ID</th>
                 <th>Nama</th>
                 <th>Email</th>
-                <th>Peran</th>
+                <th>Role</th>
                 <th>Tanggal Terdaftar</th>
-                <th style="width: 150px; text-align: center;">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -109,10 +78,6 @@ if (empty($users)) {
                 </td>
                 <td class="text-muted">
                   <?= date('d M Y', strtotime($usr['created_at'])) ?>
-                </td>
-                <td class="text-center">
-                  <button class="btn-icon edit"><i class="fas fa-edit"></i></button>
-                  <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
                 </td>
               </tr>
               <?php endforeach; ?>

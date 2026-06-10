@@ -219,4 +219,58 @@ BEGIN
     DELETE FROM platform_online WHERE id_platform = p_id;
 END //
 
+
+-- F. PROSEDUR CRUD UMKM
+DROP PROCEDURE IF EXISTS sp_UpdateUMKM //
+CREATE PROCEDURE sp_UpdateUMKM(
+    IN p_id_umkm BIGINT,
+    IN p_id_kategori BIGINT,
+    IN p_nama_umkm VARCHAR(255),
+    IN p_pemilik VARCHAR(255),
+    IN p_deskripsi TEXT,
+    IN p_tahun_berdiri YEAR,
+    IN p_latitude DECIMAL(10,8),
+    IN p_longitude DECIMAL(11,8),
+    IN p_operasional_tetap BOOLEAN,
+    IN p_catatan_operasional TEXT,
+    IN p_asal_daerah TEXT,
+    IN p_status_halal VARCHAR(50),
+    IN p_izin_usaha VARCHAR(50)
+)
+BEGIN
+    UPDATE umkm SET
+        id_kategori = p_id_kategori,
+        nama_umkm = p_nama_umkm,
+        pemilik = p_pemilik,
+        deskripsi = p_deskripsi,
+        tahun_berdiri = p_tahun_berdiri,
+        latitude = p_latitude,
+        longitude = p_longitude,
+        operasional_tetap = p_operasional_tetap,
+        catatan_operasional = p_catatan_operasional,
+        asal_daerah = p_asal_daerah,
+        status_halal = p_status_halal,
+        izin_usaha = p_izin_usaha
+    WHERE id_umkm = p_id_umkm;
+END //
+
+DROP PROCEDURE IF EXISTS sp_DeleteUMKM //
+CREATE PROCEDURE sp_DeleteUMKM(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    DELETE FROM umkm WHERE id_umkm = p_id_umkm;
+END //
+
+DROP PROCEDURE IF EXISTS sp_GetDetailUMKM //
+CREATE PROCEDURE sp_GetDetailUMKM(
+    IN p_id_umkm BIGINT
+)
+BEGIN
+    SELECT u.*, k.nama_kategori 
+    FROM umkm u 
+    JOIN kategori_umkm k ON u.id_kategori = k.id_kategori 
+    WHERE u.id_umkm = p_id_umkm;
+END //
+
 DELIMITER ;

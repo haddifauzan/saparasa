@@ -81,7 +81,7 @@ BEGIN
     DELETE FROM umkm_platform_online WHERE id_umkm = OLD.id_umkm;
     -- 7. Catat aktivitas penghapusan total ini ke log_aktivitas
     INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
-    VALUES (1, CONCAT('Admin menghapus total data UMKM beserta seluruh relasinya pada id_umkm: ', OLD.id_umkm), NOW());
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus total data UMKM: ', OLD.nama_umkm, ' (ID: ', OLD.id_umkm, ')'), NOW());
 END //
 
 
@@ -244,6 +244,31 @@ FOR EACH ROW
 BEGIN
     INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
     VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menghapus platform online: ', OLD.nama_platform), NOW());
+END //
+
+
+-- F. TRIGGERS UNTUK UMKM
+DROP TRIGGER IF EXISTS after_umkm_insert //
+CREATE TRIGGER after_umkm_insert
+AFTER INSERT ON umkm
+FOR EACH ROW
+BEGIN
+    INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+    VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin menambahkan UMKM baru: ', NEW.nama_umkm), NOW());
+END //
+
+DROP TRIGGER IF EXISTS after_umkm_update //
+CREATE TRIGGER after_umkm_update
+AFTER UPDATE ON umkm
+FOR EACH ROW
+BEGIN
+    IF OLD.nama_umkm != NEW.nama_umkm THEN
+        INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+        VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin mengubah nama UMKM dari ', OLD.nama_umkm, ' menjadi ', NEW.nama_umkm), NOW());
+    ELSE
+        INSERT INTO log_aktivitas (id_user, aktivitas, waktu)
+        VALUES (COALESCE(@current_user_id, 1), CONCAT('Admin memperbarui data UMKM: ', NEW.nama_umkm), NOW());
+    END IF;
 END //
 
 DELIMITER ;

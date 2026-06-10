@@ -10,7 +10,7 @@ function is_active($pages) {
 <nav id="sidebar">
   <!-- Brand -->
   <a href="dashboard.php" class="sidebar-brand">
-    <div class="brand-icon"><i class="fas fa-leaf"></i></div>
+    <div class="brand-icon" style="color: #00420eff;"><i class="fas fa-leaf"></i></div>
     <span class="brand-text">Saparasa</span>
   </a>
 
@@ -134,34 +134,10 @@ function is_active($pages) {
     <ul class="list-unstyled">
       <!-- Sistem Collapsible -->
       <li class="nav-item">
-        <a class="nav-link d-flex align-items-center justify-content-between <?= is_active(['log-aktivitas.php', 'laporan.php']) ?>" 
-           data-bs-toggle="collapse" 
-           href="#collapseSistem" 
-           role="button" 
-           aria-expanded="<?= is_active(['log-aktivitas.php', 'laporan.php']) ? 'true' : 'false' ?>" 
-           aria-controls="collapseSistem">
-          <div>
-            <span class="nav-icon me-2"><i class="fas fa-cogs"></i></span>
-            <span class="nav-label">Sistem</span>
-          </div>
-          <small><i class="fas fa-chevron-down ms-1" style="font-size: 10px;"></i></small>
+        <a href="log-aktivitas.php" class="nav-link <?= is_active('log-aktivitas.php') ?>">
+          <span class="nav-icon"><i class="fas fa-history"></i></span>
+          <span class="nav-label">Log Aktivitas</span>
         </a>
-        <div class="collapse <?= is_active(['log-aktivitas.php', 'laporan.php']) ? 'show' : '' ?>" id="collapseSistem">
-          <ul class="list-unstyled ps-3 mt-1">
-            <li>
-              <a href="log-aktivitas.php" class="nav-link <?= is_active('log-aktivitas.php') ?>">
-                <span class="nav-icon"><i class="fas fa-circle" style="font-size: 8px;"></i></span>
-                <span class="nav-label">Log Aktivitas</span>
-              </a>
-            </li>
-            <li>
-              <a href="laporan.php" class="nav-link <?= is_active('laporan.php') ?>">
-                <span class="nav-icon"><i class="fas fa-circle" style="font-size: 8px;"></i></span>
-                <span class="nav-label">Laporan</span>
-              </a>
-            </li>
-          </ul>
-        </div>
       </li>
     </ul>
   </div>

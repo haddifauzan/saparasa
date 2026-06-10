@@ -19,37 +19,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    // Database fallback
-}
-
-// Fallback to mock data if empty
-if (empty($reviews)) {
-    $reviews = [
-        [
-            'id_review' => 1,
-            'nama_user' => 'User Setia',
-            'nama_umkm' => 'Minang Jaya',
-            'rating' => 5,
-            'komentar' => 'Makanannya enak sekali dan porsinya besar. Rendangnya juara!',
-            'created_at' => '2026-06-09 13:12:00'
-        ],
-        [
-            'id_review' => 2,
-            'nama_user' => 'Budi Santoso',
-            'nama_umkm' => 'Kopi Nusantara',
-            'rating' => 4,
-            'komentar' => 'Kopi Gayo-nya mantap, wangi sekali. Tempatnya asyik buat kerja.',
-            'created_at' => '2026-06-08 15:30:00'
-        ],
-        [
-            'id_review' => 3,
-            'nama_user' => 'Siti Aminah',
-            'nama_umkm' => 'Batik Cirebon',
-            'rating' => 5,
-            'komentar' => 'Bahan batiknya halus sekali, motifnya juga modern dan bervariasi.',
-            'created_at' => '2026-06-07 10:45:00'
-        ]
-    ];
+    echo "Gagal: " . $e->getMessage();
 }
 ?>
 
@@ -77,7 +47,6 @@ if (empty($reviews)) {
                 <th>Rating</th>
                 <th>Komentar</th>
                 <th>Tanggal</th>
-                <th style="width: 100px; text-align: center;">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -85,7 +54,7 @@ if (empty($reviews)) {
               <tr>
                 <td><?= $rev['id_review'] ?></td>
                 <td><strong><?= $rev['nama_user'] ?></strong></td>
-                <td><span class="text-primary fw-600"><?= $rev['nama_umkm'] ?></span></td>
+                <td><span class="text-dark"><span><?= $rev['nama_umkm'] ?></span></td>
                 <td>
                   <span class="text-warning">
                     <?php for ($i = 0; $i < 5; $i++): ?>
@@ -96,9 +65,6 @@ if (empty($reviews)) {
                 <td><em>"<?= $rev['komentar'] ?>"</em></td>
                 <td class="text-muted">
                   <?= date('d M Y H:i', strtotime($rev['created_at'])) ?>
-                </td>
-                <td class="text-center">
-                  <button class="btn-icon delete"><i class="fas fa-trash"></i></button>
                 </td>
               </tr>
               <?php endforeach; ?>
