@@ -42,8 +42,8 @@ if ($result) {
     }
 }
 // Free result and clear multi-results from stored procedure CALL
-while ($conn->next_result()) {
-    $conn->store_result();
+while ($conn->more_results() && $conn->next_result()) {
+    if ($res = $conn->store_result()) { $res->free(); }
 }
 ?>
 <!DOCTYPE html>

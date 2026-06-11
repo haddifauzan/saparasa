@@ -21,6 +21,74 @@ if ($res_ratings) {
     }
 }
 
+// --- FETCH 6 STATISTIK WAJIB ---
+// Set Timezone to Indonesia/Jakarta
+date_default_timezone_set('Asia/Jakarta');
+
+// 1. UMKM Buka Saat Ini
+$stat_buka_sekarang = 0;
+$today = strtolower(date('l'));
+$days = ['sunday' => 'minggu', 'monday' => 'senin', 'tuesday' => 'selasa', 'wednesday' => 'rabu', 'thursday' => 'kamis', 'friday' => 'jumat', 'saturday' => 'sabtu'];
+$hari = $days[$today];
+$current_time = date('H:i:s');
+$stmt_stat1 = $conn->prepare("CALL sp_stat_umkm_by_jam(?, ?)");
+$stmt_stat1->bind_param("ss", $hari, $current_time);
+$stmt_stat1->execute();
+$res_stat1 = $stmt_stat1->get_result();
+if($res_stat1) $stat_buka_sekarang = $res_stat1->num_rows;
+while ($conn->more_results() && $conn->next_result()) { if ($r = $conn->store_result()) $r->free(); }
+
+// 2. UMKM < 15rb
+$stat_jajanan_murah = 0;
+$stmt_stat2 = $conn->query("CALL sp_stat_umkm_by_range_harga(0, 15000)");
+if($stmt_stat2) {
+    $row = $stmt_stat2->fetch_assoc();
+    $stat_jajanan_murah = $row['total_umkm'];
+}
+while ($conn->more_results() && $conn->next_result()) { if ($r = $conn->store_result()) $r->free(); }
+
+// 3. Mitra Terbanyak
+$stat_mitra_terbanyak = "-";
+$stmt_stat3 = $conn->query("CALL sp_stat_mitra_terbanyak()");
+if($stmt_stat3 && $stmt_stat3->num_rows > 0) {
+    $row = $stmt_stat3->fetch_assoc();
+    $stat_mitra_terbanyak = $row['nama_platform'];
+}
+while ($conn->more_results() && $conn->next_result()) { if ($r = $conn->store_result()) $r->free(); }
+
+// 4. Metode Pembayaran Non Tunai
+$stat_pembayaran = [];
+$stmt_stat4 = $conn->query("CALL sp_stat_metode_pembayaran_noncash()");
+if($stmt_stat4) {
+    while($row = $stmt_stat4->fetch_assoc()) {
+        $stat_pembayaran[] = $row['nama_pembayaran'];
+    }
+}
+while ($conn->more_results() && $conn->next_result()) { if ($r = $conn->store_result()) $r->free(); }
+$stat_pembayaran_str = !empty($stat_pembayaran) ? implode(", ", $stat_pembayaran) : "Belum Tersedia";
+
+// 5. Halal
+$stat_halal = 0;
+$stmt_stat5 = $conn->query("CALL sp_stat_sertifikasi_halal()");
+if($stmt_stat5) {
+    while($row = $stmt_stat5->fetch_assoc()) {
+        if(strtolower($row['status_halal']) == 'sudah') {
+            $stat_halal = $row['jumlah_umkm'];
+        }
+    }
+}
+while ($conn->more_results() && $conn->next_result()) { if ($r = $conn->store_result()) $r->free(); }
+
+// 6. Rasa Populer
+$stat_rasa_populer = "-";
+$stmt_stat6 = $conn->query("CALL sp_stat_umkm_by_kategori_rasa()");
+if($stmt_stat6 && $stmt_stat6->num_rows > 0) {
+    $row = $stmt_stat6->fetch_assoc();
+    $stat_rasa_populer = $row['nama_rasa'] ?? "-";
+}
+while ($conn->more_results() && $conn->next_result()) { if ($r = $conn->store_result()) $r->free(); }
+
+
 // Fetch Recent Logs
 $res_logs = $conn->query("
     SELECT l.*, u.nama 
@@ -143,6 +211,70 @@ if ($res_recent_umkm) {
                         </div>
                         <div class="fs-1" style="opacity: 0.4;"><i class="fas fa-utensils"></i></div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h6 class="fw-bold mb-3 mt-4 text-dark"><i class="fas fa-chart-pie me-2 text-dark"></i> Informasi UMKM Saparua</h6>
+    <div class="row g-3 mb-4">
+        <!-- 1. Buka Saat Ini -->
+        <div class="col-md-2 col-sm-4 col-6">
+            <div class="card h-100 shadow-sm border-0 bg-white" style="border-radius: 10px; border-bottom: 4px solid #10b981 !important;">
+                <div class="card-body text-center p-3">
+                    <div class="fs-3 mb-2"><i class="fas fa-door-open text-success" style="opacity: 0.8;"></i></div>
+                    <h4 class="fw-bold text-dark mb-0"><?= $stat_buka_sekarang ?></h4>
+                    <p class="text-muted mb-0" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">Buka Saat Ini</p>
+                </div>
+            </div>
+        </div>
+        <!-- 2. Harga Pelajar -->
+        <div class="col-md-2 col-sm-4 col-6">
+            <div class="card h-100 shadow-sm border-0 bg-white" style="border-radius: 10px; border-bottom: 4px solid #f59e0b !important;">
+                <div class="card-body text-center p-3">
+                    <div class="fs-3 mb-2"><i class="fas fa-coins text-warning" style="opacity: 0.8;"></i></div>
+                    <h4 class="fw-bold text-dark mb-0"><?= $stat_jajanan_murah ?></h4>
+                    <p class="text-muted mb-0" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">UMKM &lt; Rp15rb</p>
+                </div>
+            </div>
+        </div>
+        <!-- 3. Mitra Terbanyak -->
+        <div class="col-md-2 col-sm-4 col-6">
+            <div class="card h-100 shadow-sm border-0 bg-white" style="border-radius: 10px; border-bottom: 4px solid #3b82f6 !important;">
+                <div class="card-body text-center p-3">
+                    <div class="fs-3 mb-2"><i class="fas fa-motorcycle text-primary" style="opacity: 0.8;"></i></div>
+                    <h5 class="fw-bold text-dark mb-0 mt-2 text-truncate" title="<?= $stat_mitra_terbanyak ?>" style="max-width: 100%;"><?= $stat_mitra_terbanyak ?></h5>
+                    <p class="text-muted mb-0 mt-1" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">Mitra Terbanyak</p>
+                </div>
+            </div>
+        </div>
+        <!-- 4. Metode Pembayaran -->
+        <div class="col-md-2 col-sm-4 col-6">
+            <div class="card h-100 shadow-sm border-0 bg-white" style="border-radius: 10px; border-bottom: 4px solid #ef4444 !important;">
+                <div class="card-body text-center p-3">
+                    <div class="fs-3 mb-2"><i class="fas fa-credit-card text-danger" style="opacity: 0.8;"></i></div>
+                    <h6 class="fw-bold text-dark mb-0 mt-2 text-truncate" title="<?= $stat_pembayaran_str ?>" style="max-width: 100%;"><?= $stat_pembayaran_str ?></h6>
+                    <p class="text-muted mb-0 mt-1" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">Metode Non-Tunai</p>
+                </div>
+            </div>
+        </div>
+        <!-- 5. Halal -->
+        <div class="col-md-2 col-sm-4 col-6">
+            <div class="card h-100 shadow-sm border-0 bg-white" style="border-radius: 10px; border-bottom: 4px solid #6366f1 !important;">
+                <div class="card-body text-center p-3">
+                    <div class="fs-3 mb-2"><i class="fas fa-certificate" style="color: #6366f1; opacity: 0.8;"></i></div>
+                    <h4 class="fw-bold text-dark mb-0"><?= $stat_halal ?></h4>
+                    <p class="text-muted mb-0" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">Sertifikasi Halal</p>
+                </div>
+            </div>
+        </div>
+        <!-- 6. Rasa Populer -->
+        <div class="col-md-2 col-sm-4 col-6">
+            <div class="card h-100 shadow-sm border-0 bg-white" style="border-radius: 10px; border-bottom: 4px solid #8b5cf6 !important;">
+                <div class="card-body text-center p-3">
+                    <div class="fs-3 mb-2"><i class="fas fa-fire-flame-curved" style="color: #8b5cf6; opacity: 0.8;"></i></div>
+                    <h5 class="fw-bold text-dark mb-0 mt-2 text-truncate" title="<?= $stat_rasa_populer ?>" style="max-width: 100%;"><?= $stat_rasa_populer ?></h5>
+                    <p class="text-muted mb-0 mt-1" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">Rasa Populer</p>
                 </div>
             </div>
         </div>

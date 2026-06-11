@@ -437,4 +437,188 @@ BEGIN
     WHERE id_umkm = p_id_umkm;
 END //
 
+-- ==========================================
+-- PROSEDUR FILTER LANJUTAN (DAFTAR UMKM)
+-- ==========================================
+DROP PROCEDURE IF EXISTS sp_get_umkm_list_advanced //
+CREATE PROCEDURE sp_get_umkm_list_advanced(
+    IN p_search VARCHAR(255),
+    IN p_category VARCHAR(255),
+    IN p_hari VARCHAR(15),
+    IN p_jam TIME,
+    IN p_min_harga DECIMAL(10,2),
+    IN p_max_harga DECIMAL(10,2),
+    IN p_halal VARCHAR(50),
+    IN p_rasa VARCHAR(255),
+    IN p_mitra VARCHAR(255),
+    IN p_pembayaran VARCHAR(255),
+    IN p_limit INT
+)
+BEGIN
+    DECLARE v_limit INT;
+    SET v_limit = IF(p_limit IS NULL OR p_limit <= 0, 1000000, p_limit);
+
+    SELECT DISTINCT 
+        u.id_umkm, 
+        u.nama_umkm, 
+        k.nama_kategori,
+        COALESCE(ROUND((SELECT AVG(rating) FROM review_pengunjung WHERE id_umkm = u.id_umkm), 1), 0.0) AS avg_rating,
+        (SELECT COUNT(*) FROM review_pengunjung WHERE id_umkm = u.id_umkm) AS count_reviews,
+        COALESCE(
+            (SELECT foto FROM galeri_umkm WHERE id_umkm = u.id_umkm AND jenis_foto = 'stand' LIMIT 1),
+            (SELECT foto FROM galeri_umkm WHERE id_umkm = u.id_umkm LIMIT 1)
+        ) AS foto,
+        (SELECT CONCAT(TIME_FORMAT(jam_buka, '%H.%i'), ' - ', TIME_FORMAT(jam_tutup, '%H.%i'), ' WIB')
+         FROM operasional_umkm 
+         WHERE id_umkm = u.id_umkm AND hari = p_hari AND jam_buka IS NOT NULL AND jam_tutup IS NOT NULL
+         LIMIT 1
+        ) AS op_text
+    FROM umkm u
+    LEFT JOIN kategori_umkm k ON u.id_kategori = k.id_kategori
+    LEFT JOIN menu_umkm m ON u.id_umkm = m.id_umkm
+    LEFT JOIN menu_rasa mr ON m.id_menu = mr.id_menu
+    LEFT JOIN kategori_rasa kr ON mr.id_rasa = kr.id_rasa
+    LEFT JOIN operasional_umkm o ON u.id_umkm = o.id_umkm
+    LEFT JOIN umkm_platform_online upo ON u.id_umkm = upo.id_umkm
+    LEFT JOIN platform_online po ON upo.id_platform = po.id_platform
+    LEFT JOIN umkm_pembayaran up ON u.id_umkm = up.id_umkm
+    LEFT JOIN metode_pembayaran mp ON up.id_pembayaran = mp.id_pembayaran
+    WHERE 
+        (p_search IS NULL OR p_search = '' OR 
+         u.nama_umkm LIKE CONCAT('%', p_search, '%') OR
+         m.nama_menu LIKE CONCAT('%', p_search, '%'))
+        AND (p_category IS NULL OR p_category = '' OR k.nama_kategori = p_category)
+        AND (p_halal IS NULL OR p_halal = '' OR u.status_halal = p_halal)
+        AND (p_rasa IS NULL OR p_rasa = '' OR kr.nama_rasa = p_rasa)
+        AND (p_mitra IS NULL OR p_mitra = '' OR po.nama_platform = p_mitra)
+        AND (p_pembayaran IS NULL OR p_pembayaran = '' OR mp.nama_pembayaran = p_pembayaran)
+        AND (p_jam IS NULL OR (o.hari = p_hari AND (
+            (o.jam_buka <= o.jam_tutup AND p_jam BETWEEN o.jam_buka AND o.jam_tutup) OR
+            (o.jam_buka > o.jam_tutup AND (p_jam >= o.jam_buka OR p_jam <= o.jam_tutup))
+        )))
+        AND (p_max_harga IS NULL OR p_max_harga = 0 OR (m.harga BETWEEN p_min_harga AND p_max_harga))
+    ORDER BY u.id_umkm ASC
+    LIMIT v_limit;
+END //
+
+-- ==========================================
+-- PROSEDUR STATISTIK & FILTER (6 KEBUTUHAN WAJIB)
+-- ==========================================
+
+-- 1. Jumlah umkm yang buka di jam tertentu + info lokasi, foto, link mitra
+DROP PROCEDURE IF EXISTS sp_stat_umkm_by_jam //
+CREATE PROCEDURE sp_stat_umkm_by_jam(
+    IN p_hari VARCHAR(15),
+    IN p_jam TIME
+)
+BEGIN
+    -- Query ini akan mengembalikan data UMKM yang buka pada jam tertentu, lengkap dengan lokasi, foto, dan link platform online
+    SELECT 
+        u.id_umkm,
+        u.nama_umkm,
+        u.asal_daerah,
+        u.latitude,
+        u.longitude,
+        o.jam_buka,
+        o.jam_tutup,
+        (SELECT foto FROM galeri_umkm WHERE id_umkm = u.id_umkm LIMIT 1) AS foto,
+        GROUP_CONCAT(DISTINCT CONCAT(po.nama_platform, ': ', upo.link_platform) SEPARATOR ', ') AS link_mitra
+    FROM operasional_umkm o
+    JOIN umkm u ON o.id_umkm = u.id_umkm
+    LEFT JOIN umkm_platform_online upo ON u.id_umkm = upo.id_umkm
+    LEFT JOIN platform_online po ON upo.id_platform = po.id_platform
+    WHERE LOWER(o.hari) = LOWER(p_hari)
+      AND (
+          (o.jam_buka <= o.jam_tutup AND p_jam BETWEEN o.jam_buka AND o.jam_tutup) OR
+          (o.jam_buka > o.jam_tutup AND (p_jam >= o.jam_buka OR p_jam <= o.jam_tutup))
+      )
+      AND o.jam_buka IS NOT NULL 
+      AND o.jam_tutup IS NOT NULL
+    GROUP BY u.id_umkm;
+END //
+
+-- 2. Jumlah umkm dengan harga per pcs di range tertentu
+DROP PROCEDURE IF EXISTS sp_stat_umkm_by_range_harga //
+CREATE PROCEDURE sp_stat_umkm_by_range_harga(
+    IN p_min_harga DECIMAL(10,2),
+    IN p_max_harga DECIMAL(10,2)
+)
+BEGIN
+    -- Menghitung total jumlah UMKM (Total UMKM)
+    SELECT COUNT(DISTINCT m.id_umkm) AS total_umkm
+    FROM menu_umkm m
+    WHERE m.harga BETWEEN p_min_harga AND p_max_harga;
+    
+    -- Menampilkan detail UMKM dan menu-menunya yang sesuai harga
+    SELECT DISTINCT 
+        u.id_umkm,
+        u.nama_umkm,
+        m.nama_menu,
+        m.harga
+    FROM umkm u
+    JOIN menu_umkm m ON u.id_umkm = m.id_umkm
+    WHERE m.harga BETWEEN p_min_harga AND p_max_harga
+    ORDER BY m.harga ASC;
+END //
+
+-- 3. Jumlah mitra umkm terbanyak (gofood, shopeefood, dll)
+DROP PROCEDURE IF EXISTS sp_stat_mitra_terbanyak //
+CREATE PROCEDURE sp_stat_mitra_terbanyak()
+BEGIN
+    SELECT 
+        po.nama_platform,
+        COUNT(upo.id_umkm) AS jumlah_umkm
+    FROM platform_online po
+    LEFT JOIN umkm_platform_online upo ON po.id_platform = upo.id_platform
+    GROUP BY po.id_platform, po.nama_platform
+    ORDER BY jumlah_umkm DESC;
+END //
+
+-- 4. Jumlah metode pembayaran selain cash
+DROP PROCEDURE IF EXISTS sp_stat_metode_pembayaran_noncash //
+CREATE PROCEDURE sp_stat_metode_pembayaran_noncash()
+BEGIN
+    SELECT 
+        mp.nama_pembayaran,
+        COUNT(up.id_umkm) AS jumlah_umkm
+    FROM metode_pembayaran mp
+    LEFT JOIN umkm_pembayaran up ON mp.id_pembayaran = up.id_pembayaran
+    WHERE LOWER(mp.nama_pembayaran) NOT IN ('cash', 'tunai')
+    GROUP BY mp.id_pembayaran, mp.nama_pembayaran
+    ORDER BY jumlah_umkm DESC;
+END //
+
+-- 5. Jumlah umkm berdasarkan status sertifikasi halal
+DROP PROCEDURE IF EXISTS sp_stat_sertifikasi_halal //
+CREATE PROCEDURE sp_stat_sertifikasi_halal()
+BEGIN
+    SELECT 
+        status_halal,
+        COUNT(id_umkm) AS jumlah_umkm
+    FROM umkm
+    GROUP BY status_halal
+    ORDER BY 
+        CASE status_halal 
+            WHEN 'sudah' THEN 1 
+            WHEN 'proses' THEN 2 
+            WHEN 'belum' THEN 3 
+            WHEN 'tidak' THEN 4 
+            ELSE 5 
+        END;
+END //
+
+-- 6. Jumlah umkm dengan kategori rasa makanan/minuman tertentu
+DROP PROCEDURE IF EXISTS sp_stat_umkm_by_kategori_rasa //
+CREATE PROCEDURE sp_stat_umkm_by_kategori_rasa()
+BEGIN
+    SELECT 
+        kr.nama_rasa,
+        COUNT(DISTINCT m.id_umkm) AS jumlah_umkm
+    FROM kategori_rasa kr
+    LEFT JOIN menu_rasa mr ON kr.id_rasa = mr.id_rasa
+    LEFT JOIN menu_umkm m ON mr.id_menu = m.id_menu
+    GROUP BY kr.id_rasa, kr.nama_rasa
+    ORDER BY jumlah_umkm DESC;
+END //
+
 DELIMITER ;
