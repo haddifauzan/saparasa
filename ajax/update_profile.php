@@ -40,7 +40,14 @@ if (!empty($password)) {
 // Handle Profile Picture Upload
 if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
     $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-    $file_type = mime_content_type($_FILES['foto']['tmp_name']);
+    
+    // Gunakan getimagesize atau $_FILES['type'] sebagai fallback jika mime_content_type tidak ada
+    if (function_exists('mime_content_type')) {
+        $file_type = mime_content_type($_FILES['foto']['tmp_name']);
+    } else {
+        $image_info = @getimagesize($_FILES['foto']['tmp_name']);
+        $file_type = $image_info ? $image_info['mime'] : $_FILES['foto']['type'];
+    }
     
     if (!in_array($file_type, $allowed_types)) {
         echo json_encode(['status' => 'error', 'message' => 'Format file foto tidak valid.']);
